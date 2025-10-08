@@ -110,7 +110,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
       />
       <Card.Body className="d-flex flex-column">
         <Card.Section className="pb-2.5 d-flex flex-grow-0 justify-content-between chip-section">
-          <Chip iconBefore={FormatListBulleted} className="border-0 p-0 lp-chip">LEARNING PATH</Chip>
+          <Chip iconBefore={FormatListBulleted} className="border-0 p-0 lp-chip">CATALOG</Chip>
           {!!statusVariant && <Chip iconBefore={statusIcon} className={`pl-1 status-chip status-${statusVariant}`}>{status.toUpperCase()}</Chip>}
         </Card.Section>
         <Card.Section className="pt-4 pt-md-1 pb-1"><h3>{displayName}</h3></Card.Section>

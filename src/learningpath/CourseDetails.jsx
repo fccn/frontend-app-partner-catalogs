@@ -73,7 +73,7 @@ const CourseDetailContent = ({
           <Row className="p-0 m-0 d-flex align-items-center modal-header">
             <Col xs={10}>
               <h4 className="mb-0 pl-4 text-muted font-weight-normal text-truncate">
-                <b>Learning Path:</b> {learningPathTitle}
+                <b>Catalog:</b> {learningPathTitle}
               </h4>
             </Col>
             <ModalCloseButton variant="tertiary" onClick={handleClose} className="mr-2 rounded-circle">

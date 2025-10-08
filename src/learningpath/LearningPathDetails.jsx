@@ -163,7 +163,7 @@ const LearningPathDetailPage = () => {
               />
             )}
             <Card.Section className="px-4 py-4 py-md-3.5">
-              <Chip iconBefore={FormatListBulleted} className="lp-chip">LEARNING PATH</Chip>
+              <Chip iconBefore={FormatListBulleted} className="lp-chip">CATALOG</Chip>
               <h1 className="my-3 mt-4.5">{displayName}</h1>
               {/* eslint-disable-next-line react/no-danger */}
               <div className="text-muted" dangerouslySetInnerHTML={{ __html: subtitle || 'No subtitle available.' }} />
