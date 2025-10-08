@@ -66,7 +66,7 @@ const FilterPanel = ({
           onClick={() => onSelectContentType('learning_path')}
           active={selectedContentType === 'learning_path'}
         >
-          Learning Paths
+          Catalogs
         </Button>
       </ButtonGroup>
     </div>
