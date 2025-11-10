@@ -106,7 +106,7 @@ const LearningPathDetailPage = () => {
   };
 
   // TODO: Retrieve this from the backend.
-  const org = key.match(/path-v1:([^+]+)/)[1];
+  const org = key;
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
     name: organizations[org]?.name || org,

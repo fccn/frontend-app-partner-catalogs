@@ -4,7 +4,7 @@ import ProgressIndicator from './ProgressIndicator';
 import { Course } from './types';
 
 interface CompletionMessageProps {
-  completed: 'Completed' | 'Not started';
+  completed: 'Completed' | 'Sent';
 }
 
 const CompletionMessage: React.FC<CompletionMessageProps> = ({ completed }) => (
@@ -38,7 +38,7 @@ const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
   enrollmentDateInLearningPath = null,
   onCourseClick,
 }) => {
-  const finalIndicatorStatus: 'Completed' | 'Not started' = courses.every(course => course.status.toLowerCase() === 'completed') ? 'Completed' : 'Not started';
+  const finalIndicatorStatus: 'Completed' | 'Sent' = courses.every(course => course.status.toLowerCase() === 'completed') ? 'Completed' : 'Sent';
 
   return (
     <div className="courses-with-progress-list">

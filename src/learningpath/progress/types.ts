@@ -1,4 +1,4 @@
-export type ProgressStatus = 'Completed' | 'In progress' | 'Not started';
+export type ProgressStatus = 'Completed' | 'Accepted' | 'Sent';
 
 export interface Course {
   id: string;

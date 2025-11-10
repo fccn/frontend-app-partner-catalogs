@@ -210,7 +210,7 @@ const Dashboard = () => {
   }), [items, selectedContentType, selectedStatuses, selectedDateStatuses, selectedOrgs, searchQuery, getDateStatus]);
 
   const sortedItems = useMemo(() => {
-    const statusOrder = { 'not started': 1, 'in progress': 2, completed: 3 };
+    const statusOrder = { 'sent': 1, 'accepted': 2, completed: 3 };
     const dateStatusOrder = { Upcoming: 1, Open: 2, Ended: 3 };
 
     return [...filteredItems].sort((a, b) => {

@@ -20,13 +20,13 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ status }) => {
         return {
           icon: Timelapse,
           color: 'var(--m-teal)',
-          altText: 'In progress',
+          altText: 'Accepted',
         };
       default:
         return {
           icon: LmsCompletionSolid,
           color: '#8996A0',
-          altText: 'Not started',
+          altText: 'Sent',
         };
     }
   };
