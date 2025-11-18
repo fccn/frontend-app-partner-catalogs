@@ -5,9 +5,9 @@
  */
 export const calculateCompletionStatus = (completion) => {
   const percent = completion || 0;
-  let status = 'In progress';
+  let status = 'Accepted';
   if (percent <= 0.0) {
-    status = 'Not started';
+    status = 'Sent';
   } else if (percent >= 1.0) {
     status = 'Completed';
   }

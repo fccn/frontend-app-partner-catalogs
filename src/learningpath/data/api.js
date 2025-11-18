@@ -4,14 +4,14 @@ import { getConfig, camelCaseObject } from '@edx/frontend-platform';
 export async function fetchLearningPaths() {
   const client = getAuthenticatedHttpClient();
   // FIXME: This API has pagination.
-  const response = await client.get(`${getConfig().LMS_BASE_URL}/api/learning_paths/v1/learning-paths/`);
+  const response = await client.get(`${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/partners/1/catalogs/`);
   const data = response.data.results || response.data;
   return camelCaseObject(data);
 }
 
 export async function fetchLearningPathDetail(key) {
   const client = getAuthenticatedHttpClient();
-  const response = await client.get(`${getConfig().LMS_BASE_URL}/api/learning_paths/v1/learning-paths/${key}/`);
+  const response = await client.get(`${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/partners/1/catalogs/${key}/`);
   return camelCaseObject(response.data);
 }
 

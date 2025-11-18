@@ -148,10 +148,6 @@
       border-top: 5px solid #8C8179 !important;
     }
 
-    &.lp-card .pgn__card-body {
-        border-top: 5px solid var(--crimson) !important;
-    }
-
     .pgn__card-wrapper-image-cap {
       .pgn__card-image-cap {
         /* The default (`auto`) value does not work in Safari. */
@@ -159,7 +155,6 @@
       }
 
       .pgn__card-logo-cap {
-        top: 1rem;
         left: 1rem !important;
       }
     }
@@ -372,21 +367,28 @@
 
   &.status-chip {
     border: 0;
-
-    &.status-secondary {
-      background-color: #8996A0;
+  
+    .pgn__chip__label,
+    .pgn__icon {
+      color: white !important;
+      font-weight: 400;
     }
 
+    &.status-pending {
+      background-color: #FEBE46B2;
+  
+      .pgn__chip__label,
+      .pgn__icon {
+        color: black !important;
+      }
+    }
+  
     &.status-info {
       background-color: #05A59D;
     }
-
-    &.status-success {
-      background-color: #52854C;
-    }
-
-    .pgn__chip__label, .pgn__icon {
-      color: white !important;
+  
+    &.status-accepted {
+      background-color: #029550;
     }
   }
 

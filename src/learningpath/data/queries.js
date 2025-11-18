@@ -54,30 +54,27 @@ export const useLearningPaths = () => {
 
       return learningPathList.map(lp => {
         // Calculate progress based on course completions
-        const totalCourses = lp.steps.length;
+        const totalCourses = lp.courses;
 
         if (totalCourses === 0) {
           return {
             ...lp,
             numCourses: 0,
-            status: 'Not started',
+            status: 'Sent',
             maxDate: null,
             percent: 0,
             type: 'learning_path',
           };
         }
 
-        const totalCompletion = lp.steps.reduce((sum, step) => {
-          const completion = completionsMap[step.courseKey];
-          return sum + (completion?.percent ?? 0);
-        }, 0);
+        const totalCompletion = 0;
 
         const progress = totalCompletion / totalCourses;
         const requiredCompletion = lp.requiredCompletion || 0;
 
-        let status = 'In progress';
+        let status = 'Accepted';
         if (progress === 0) {
-          status = 'Not started';
+          status = 'Sent';
         } else if (progress >= requiredCompletion) {
           status = 'Completed';
         }
@@ -91,32 +88,18 @@ export const useLearningPaths = () => {
 
         let minDate = null;
         let maxDate = null;
-        for (const course of lp.steps) {
-          if (course.courseDates && course.courseDates.length > 0) {
-            if (course.courseDates[0]) {
-              const startDateObj = new Date(course.courseDates[0]);
-              if (!minDate || startDateObj < minDate) {
-                minDate = startDateObj;
-              }
-            }
-            if (course.courseDates[1]) {
-              const endDateObj = new Date(course.courseDates[1]);
-              if (!maxDate || endDateObj > maxDate) {
-                maxDate = endDateObj;
-              }
-            }
-          }
-        }
 
         return {
           ...lp,
+          key: lp.id,
+          displayName: lp.name,
           numCourses: totalCourses,
           status,
           minDate,
           maxDate,
           percent,
           type: 'learning_path',
-          org: lp.key.match(/path-v1:([^+]+)/)[1],
+          org: lp.org,
           enrollmentDate: lp.enrollmentDate ? new Date(lp.enrollmentDate) : null,
         };
       });

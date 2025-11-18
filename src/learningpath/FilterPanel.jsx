@@ -80,8 +80,8 @@ const FilterPanel = ({
           onChange={e => onChangeStatus(e.target.value, e.target.checked)}
           value={selectedStatuses}
         >
-          <Form.Checkbox value="In progress" className="font-weight-light">In progress</Form.Checkbox>
-          <Form.Checkbox value="Not started" className="font-weight-light">Not started</Form.Checkbox>
+          <Form.Checkbox value="Accepted" className="font-weight-light">Accepted</Form.Checkbox>
+          <Form.Checkbox value="Sent" className="font-weight-light">Sent</Form.Checkbox>
           <Form.Checkbox value="Completed" className="font-weight-light">Completed</Form.Checkbox>
         </Form.CheckboxSet>
       </Form.Group>
