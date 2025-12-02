@@ -11,6 +11,7 @@ import {
   Check,
   ArrowForward,
   Settings,
+  RemoveRedEye,
 } from '@openedx/paragon/icons';
 import { useOrganizations, usePrefetchLearningPathDetail } from './data/queries';
 import { useScreenSize } from '../hooks/useScreenSize';
@@ -48,8 +49,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   switch (status?.toLowerCase()) {
     case 'sent':
       statusVariant = 'pending';
-      buttonText = 'Accept the invitation';
-      buttonIcon = Check
+      buttonText = 'View Catalog Info';
+      buttonIcon = RemoveRedEye
       statusAltText = "Pending Invitation"
       break;
     case 'accepted':
@@ -197,7 +198,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
                 </Button>
               </Link>
             )}
-            <Link to={`/learningpath/${key}`}>
+            <Link to={`/learningpath/${org}/${key}`}>
               <Button
                 variant="outline-primary"
                 className="w-100"

@@ -17,28 +17,15 @@ const CourseWithProgress: React.FC<CourseWithProgressProps> = ({
   onCourseClick,
 }) => (
   <div className="course-with-progress">
-    <div className="progress-indicator-wrapper">
-      <ProgressIndicator status={course.status} />
-    </div>
     <div className="course-card-wrapper">
       <CourseCardWithEnrollment
         course={course}
         learningPathId={learningPathId}
         isEnrolledInLearningPath={enrollmentDateInLearningPath != null}
         onClick={onCourseClick}
+        orientationOverride="vertical"
       />
     </div>
-    <div
-      className="progress-connector position-absolute"
-      style={{
-        top: '30px',
-        left: '17px',
-        width: '2px',
-        backgroundColor: '#E0E0E0',
-        zIndex: 1,
-        bottom: '-36px',
-      }}
-    />
   </div>
 );
 

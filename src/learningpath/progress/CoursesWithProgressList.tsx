@@ -1,29 +1,7 @@
 import React from 'react';
+import { Container, Row, Col } from '@openedx/paragon';
 import CourseWithProgress from './CourseWithProgress';
-import ProgressIndicator from './ProgressIndicator';
 import { Course } from './types';
-
-interface CompletionMessageProps {
-  completed: 'Completed' | 'Sent';
-}
-
-const CompletionMessage: React.FC<CompletionMessageProps> = ({ completed }) => (
-  <div className="course-with-progress">
-    <div className="progress-indicator-wrapper">
-      <ProgressIndicator status={completed} />
-    </div>
-    <div className="course-card-wrapper">
-      <div className="completion-message">
-        <div className="font-weight-bold mb-2" style={{ color: 'black', fontSize: '1.375rem', marginTop: '0.125rem' }}>
-          Congratulations!
-        </div>
-        <div className="text-muted">
-          You&apos;ve completed the Learning Path. We can&apos;t wait to see where these skills take you next.
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 interface CoursesWithProgressListProps {
   courses?: Course[];
@@ -38,24 +16,22 @@ const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
   enrollmentDateInLearningPath = null,
   onCourseClick,
 }) => {
-  const finalIndicatorStatus: 'Completed' | 'Sent' = courses.every(course => course.status.toLowerCase() === 'completed') ? 'Completed' : 'Sent';
 
   return (
-    <div className="courses-with-progress-list">
+    <Container fluid className="py-4 learning-path-courses-grid w-100 px-0">
+    <Row className="g-12">
       {courses.map((course) => (
-        <div key={course.id} className="mb-3">
+        <Col key={course.id} xs={12} sm={6} md={6} lg={6} xl={4}>
           <CourseWithProgress
             course={course}
             learningPathId={learningPathId}
             enrollmentDateInLearningPath={enrollmentDateInLearningPath}
             onCourseClick={() => onCourseClick(course.id)}
           />
-        </div>
+        </Col>
       ))}
-      <div className="mb-3">
-        <CompletionMessage completed={finalIndicatorStatus} />
-      </div>
-    </div>
+    </Row>
+  </Container>
   );
 };
 

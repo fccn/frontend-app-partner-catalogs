@@ -11,6 +11,8 @@ import {
   LmsCompletionSolid,
   Timelapse,
   Info,
+  HowToReg,
+  Calendar,
 } from '@openedx/paragon/icons';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { buildAssetUrl } from '../util/assetUrl';
@@ -21,7 +23,7 @@ import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 export const CourseCard = ({
-  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false,
+  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride,
 }) => {
   const {
     name,
@@ -36,7 +38,11 @@ export const CourseCard = ({
 
   const { administrator } = getAuthenticatedUser();
   const { isSmall, isMedium } = useScreenSize();
-  const orientation = (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall) ? 'vertical' : 'horizontal';
+  const orientation = orientationOverride
+    ? orientationOverride
+    : (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
+      ? 'vertical'
+      : 'horizontal';
 
   // Prefetch the course detail when the user hovers over the card.
   const prefetchCourseDetail = usePrefetchCourseDetail(course.id);
@@ -48,9 +54,9 @@ export const CourseCard = ({
 
   const linkTo = buildCourseHomeUrl(course.id);
 
-  let statusVariant = 'dark'; // default
-  let statusIcon = 'fa-circle'; // default icon
-  let buttonText = 'View';
+  let statusVariant = 'dark';
+  let statusIcon = 'fa-circle';
+  let buttonText = 'Start Course';
   switch (status?.toLowerCase()) {
     case 'completed':
       statusVariant = 'success';
@@ -59,12 +65,12 @@ export const CourseCard = ({
     case 'not started':
       statusVariant = 'secondary';
       statusIcon = LmsCompletionSolid;
-      buttonText = 'Start';
+      buttonText = 'Start Course';
       break;
     case 'in progress':
       statusVariant = 'info';
       statusIcon = Timelapse;
-      buttonText = 'Resume';
+      buttonText = 'Continue';
       break;
     default:
       break;
@@ -83,29 +89,6 @@ export const CourseCard = ({
   const startDateObj = startDate ? new Date(startDate) : null;
   const endDateObj = endDate ? new Date(endDate) : null;
 
-  // Determine access text and override button text based on access dates.
-  if (startDateObj && startDateObj > currentDate) {
-    // Course will start in the future.
-    const startDateStr = startDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    accessText = <>Access starts on <b>{startDateStr}</b></>;
-    buttonText = 'Start';
-    showStartButton = administrator;
-  } else if (endDateObj) {
-    const endDateStr = endDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    if (currentDate > endDateObj) {
-      // Course has ended.
-      accessText = <>Access ended on <b>{endDateStr}</b></>;
-      buttonText = 'View';
-      // Remove status, as learners cannot do anything to change it at this point.
-      if (status.toLowerCase() !== 'completed') {
-        statusVariant = '';
-      }
-    } else {
-      // Course is currently available.
-      accessText = <>Access until <b>{endDateStr}</b></>;
-    }
-  }
-
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
     name: organizations[org]?.name || org,
@@ -114,70 +97,86 @@ export const CourseCard = ({
 
   return (
     <>
-      <Card orientation={orientation} className={`course-card ${orientation}`} onMouseEnter={handleMouseEnter}>
+      <Card
+        orientation={orientation}
+        className={`h-full hover:shadow-lg transition-shadow ${orientation}`}
+        onMouseEnter={handleMouseEnter}
+      >
         <Card.ImageCap
           src={buildAssetUrl(courseImageAssetPath)}
           srcAlt={`${name} course image`}
           logoSrc={orgData.logo}
           logoAlt={`${orgData.name} logo`}
         />
-        <Card.Body className="d-flex flex-column">
-          <Card.Section className="pb-2.5 d-flex flex-grow-0 justify-content-between chip-section">
-            <Chip iconBefore={LmsBook} className="border-0 p-0 course-chip">COURSE</Chip>
-            {!!statusVariant && <Chip iconBefore={statusIcon} className={`pl-1 status-chip status-${statusVariant}`}>{status.toUpperCase()}</Chip>}
-          </Card.Section>
-          <Card.Section className="pt-4 pt-md-1 pb-1"><h3>{name}</h3></Card.Section>
-          <Card.Section className="pt-1 pb-1">
-            {status.toLowerCase() === 'in progress' && !!statusVariant && (
-              <ProgressBar
-                now={progressBarPercent}
-                label={`${progressBarPercent}%`}
-                variant="primary"
+
+        <Card.Header title={name} subtitle={orgData.name} size="md" />
+
+        <Card.Section>
+          <div className="space-y-3">
+            {/* Enrolled Count */}
+            <div
+              className="text-gray-600"
+              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            >
+              <Icon
+                src={HowToReg}
+                size={18}
+                className="text-blue-600 flex-none"
               />
-            )}
-          </Card.Section>
-          <Card.Footer orientation="horizontal" className="pt-3 pb-3 justify-content-between">
-            <Col className="d-flex p-0 flex-column-reverse flex-md-row align-items-start w-100 w-md-auto">
-              {accessText && (
-                <Chip iconBefore={AccessTime} className="border-0 pb-1 pb-md-0 p-0">{accessText}</Chip>
-              )}
-            </Col>
-            <div className="d-flex align-self-end ml-auto">
-              {onClickViewButton && (
-                <Button variant="outline-primary" onClick={onClickViewButton} className="mr-2 text-nowrap">More Info</Button>
-              )}
-              {showStartButton && (
-                onClick ? (
-                  <Button variant="outline-primary" onClick={onClick} disabled={disableStartButton}>
-                    {buttonText}
-                  </Button>
-                ) : (
-                  <Link to={linkTo}>
-                    <Button variant="outline-primary" disabled={disableStartButton}>{buttonText}</Button>
-                  </Link>
-                )
-              )}
+              <span className="text-sm">10 Enrolled</span>
             </div>
-          </Card.Footer>
-        </Card.Body>
-      </Card>
-      {relatedLearningPaths && relatedLearningPaths.length > 0 && (
-        <PageBanner className="rounded-bottom">
-          <div className="d-flex flex-wrap text-left w-100 mt-2 ml-2">
-            <div className="d-flex align-items-center">
-              <Icon src={Info} className="mr-2" />
-              <p className="mb-0">Related Learning Path{relatedLearningPaths.length > 1 ? 's' : ''}:</p>
+
+            {/* Duration */}
+            <div
+              className="text-gray-600"
+              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            >
+              <Icon
+                src={AccessTime}
+                className="text-blue-600 flex-none"
+              />
+              <span className="text-sm">20 Hours</span>
             </div>
-            <ul className="w-100 ml-2 mb-2">
-              {relatedLearningPaths.map((learningPath) => (
-                <li key={`${course.id}-${learningPath.key}`}>
-                  <Link to={`/learningpath/${learningPath.key}`} target="_blank" rel="noopener noreferrer">{learningPath.name}</Link>
-                </li>
-              ))}
-            </ul>
+
+            {/* Start Date */}
+            <div
+              className="text-gray-600"
+              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            >
+              <Icon
+                src={Calendar}
+                className="text-blue-600 flex-none"
+              />
+              <span className="text-sm">Starts 2025-12-02</span>
+            </div>
           </div>
-        </PageBanner>
-      )}
+        </Card.Section>
+
+        <Card.Footer>
+          <div
+            className="d-flex flex-column flex-lg-row w-100"
+            style={{ gap: '12px' }}
+          >
+            <Button
+              variant="outline-primary"
+              size="sm"
+              className="flex-fill py-2"
+              onClick={onClickViewButton}
+            >
+              More Details
+            </Button>
+
+            <Button
+              variant="primary"
+              size="sm"
+              className="flex-fill py-2"
+              onClick={disableStartButton}
+            >
+              { buttonText }
+            </Button>
+          </div>
+        </Card.Footer>
+      </Card>
     </>
   );
 };
@@ -202,10 +201,11 @@ CourseCard.propTypes = {
   onClickViewButton: PropTypes.func,
   isEnrolledInLearningPath: PropTypes.bool,
   showFilters: PropTypes.bool,
+  orientationOverride: PropTypes.oneOf(['vertical', 'horizontal']),
 };
 
 export const CourseCardWithEnrollment = ({
-  course, learningPathId, isEnrolledInLearningPath, onClick,
+  course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
   const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
   const [enrolling, setEnrolling] = useState(false);
@@ -217,7 +217,6 @@ export const CourseCardWithEnrollment = ({
     checkingEnrollment: checkingEnrollment || enrolling,
   };
 
-  // Defined here because calling the MFE config API from an async function can randomly fail.
   const courseHomeUrl = buildCourseHomeUrl(course.id);
 
   const handleCourseAction = async () => {
@@ -251,6 +250,7 @@ export const CourseCardWithEnrollment = ({
       onClick={handleCourseAction}
       onClickViewButton={onClick}
       isEnrolledInLearningPath={isEnrolledInLearningPath}
+      orientationOverride={orientationOverride}
     />
   );
 };
@@ -262,4 +262,5 @@ CourseCardWithEnrollment.propTypes = {
   learningPathId: PropTypes.string.isRequired,
   isEnrolledInLearningPath: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
+  orientationOverride: PropTypes.oneOf(['vertical', 'horizontal']),
 };
