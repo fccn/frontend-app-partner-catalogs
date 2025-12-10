@@ -19,6 +19,7 @@ import {
 import CourseDetailPage from './CourseDetails';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
+import { buildCourseAboutUrl } from './utils';  
 
 const LearningPathDetailPage = () => {
   const { isSmall } = useScreenSize();
@@ -26,11 +27,9 @@ const LearningPathDetailPage = () => {
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
-
+  const [localStatus, setLocalStatus] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
-  const handleTabSelect = (selectedKey) => {
-    setActiveTab(selectedKey);
-  };
+
 
   const handleCollapsibleToggle = (collapsibleId) => {
     setOpenCollapsible(openCollapsible === collapsibleId ? null : collapsibleId);
@@ -85,7 +84,7 @@ const LearningPathDetailPage = () => {
   // In the details view, open the course details modal.
   const handleCourseViewButton = (courseId) => {
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 10);
-    setSelectedCourseKey(courseId);
+    window.open(buildCourseAboutUrl(courseId), '_blank', 'noopener,noreferrer');
   };
 
   const handleCloseCourseModal = () => {
@@ -97,6 +96,7 @@ const LearningPathDetailPage = () => {
       setEnrolling(true);
       try {
         await enrollMutation.mutateAsync(key);
+        setLocalStatus('accepted');
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Enrollment failed:', error);
@@ -118,9 +118,10 @@ const LearningPathDetailPage = () => {
     [organizations, org],
   );
 
-  const status = detail?.status?.toLowerCase() || 'Sent';
+  const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
+  const isEnrolledInLearningPath = status === 'accepted';
   let statusVariant = "pending";
-  let statusAltText = "Without Invitation";
+  let statusAltText = "Self Enrollment";
 
   switch (status) {
     case 'sent':
@@ -129,7 +130,7 @@ const LearningPathDetailPage = () => {
       break;
     case 'accepted':
       statusVariant = 'accepted';
-    statusAltText = "Active";
+      statusAltText = "Active";
       break;
     default:
       break;
@@ -206,8 +207,7 @@ const LearningPathDetailPage = () => {
                   <div className="d-flex align-items-center flex-wrap">
                     {statusAltText && (
                       <Chip
-                        className="mr-2 mb-2"
-                        variant="success"
+                        className={`status-chip status-${statusVariant} mr-2 mb-2 px-4`}
                       >
                         {statusAltText}
                       </Chip>
@@ -224,17 +224,25 @@ const LearningPathDetailPage = () => {
                   </div>
                 </Card.Section>
               </div>
-              <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
-                <Button
-                  variant="primary"
-                  size="md"
-                  className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
-                  disabled={enrolling}
-                >
-                  {enrolling ? 'Accepting…' : 'Accept the invitation'}
-                  <Icon src={Check} className="ml-2" />
-                </Button>
-              </div>
+
+              {status !== 'accepted' && (
+                <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
+                  <Button
+                    size="md"
+                    className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
+                    onClick={handleEnrollClick}
+                    disabled={enrolling}
+                  >
+                    {(() => {
+                        if (enrolling) return 'Enrolling...';
+                        if (enrollmentDate) return 'Enrolled';
+                        if (status === 'sent') return 'Accept the invitation';
+                        return "Self Enrollment"
+                      })()}
+                    <Icon src={Check} className="ml-2" />
+                  </Button>
+                </div>
+              )}
             </div>
           </Card.Body>
         </Card>
@@ -290,115 +298,7 @@ const LearningPathDetailPage = () => {
         </Row>
       </div>
     </div>
-  )
-
-  const heroSection = (
-      <div className="hero px-4 px-md-6 pt-4">
-        <div className="hero-inner mx-auto">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <Link to="/" className="d-flex align-items-center back-link">
-              <Icon src={ChevronLeft} />
-              <span className="ml-1">Back to My Catalogs</span>
-            </Link>
-          </div>
-
-          <div className="d-flex flex-column flex-md-row align-items-stretch">
-            <Card
-              orientation={isSmall ? 'vertical' : 'horizontal'}
-              className="lp-hero-card flex-grow-1"
-            >
-              <Card.ImageCap
-                src={image}
-                srcAlt={`${name} learning path image`}
-                logoSrc={orgData.logo}
-                logoAlt={`${orgData.name} logo`}
-              />
-
-              <Card.Body className="px-4 px-md-5 py-4 py-md-5">
-                <Card.Section className="pt-1 pb-2">
-                  <h1 className="my-2 my-md-3">{name}</h1>
-                  {/* Subtitle / organización */}
-                  {/* eslint-disable-next-line react/no-danger */}
-                  <div
-                    className="text-muted mb-3"
-                    dangerouslySetInnerHTML={{
-                      __html: detail.partner.name || 'No subtitle available.',
-                    }}
-                  />
-                  <Chip className={`status-chip status-${statusVariant}`}>
-                    {statusAltText}
-                  </Chip>
-                  {detail?.courses !== undefined && detail?.courses !== null && ( 
-                    <Chip iconBefore={BookOpen} className="border-0 p-0"> 
-                      {detail?.courses} courses 
-                    </Chip> 
-                  )}
-                </Card.Section>
-                <Card.Section className="pt-1 pb-2">
-                    <Button
-                      variant={enrollmentDate ? 'secondary' : 'primary'}
-                      style={{ minWidth: '220px' }}
-                      size="sm"
-                      onClick={handleEnrollClick}
-                      disabled={enrolling || !!enrollmentDate}
-                    >
-                      {(() => {
-                        if (enrolling) return 'Enrolling...';
-                        if (enrollmentDate) return 'Enrolled';
-                        if (status === 'sent') return 'Accept the invitation';
-                        return 'Enroll';
-                      })()}
-                    </Button>
-                </Card.Section>
-              </Card.Body>
-            </Card>
-          </div>
-
-          <Row className="my-4 mx-0 hero-info lp-hero-info flex-column flex-md-row align-items-start">
-            {accessUntilDate && (
-              <div className="d-flex">
-                <Icon src={AccessTimeFilled} className="mr-4 mb-3.5" />
-                <div>
-                  <p className="mb-0 font-weight-bold">
-                    {accessUntilDate.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="mb-0 text-muted">Access ends</p>
-                </div>
-              </div>
-            )}
-            <div className="d-flex">
-              <Icon src={Award} className="mr-4 mb-3.5" />
-              <div>
-                <p className="mb-0 font-weight-bold">Certificate</p>
-                <p className="mb-0 text-muted">Courses include certification</p>
-              </div>
-            </div>
-            <div className="d-flex">
-              <Icon src={Calendar} className="mr-4 mb-3.5" />
-              <div>
-                <p className="mb-0 font-weight-bold">
-                  {duration || 'Duration not available'}
-                </p>
-                <p className="mb-0 text-muted">
-                  {timeCommitment || 'Duration'}
-                </p>
-              </div>
-            </div>
-            <div className="d-flex">
-              <Icon src={Person} className="mr-4 mb-3.5" />
-              <div>
-                <p className="mb-0 font-weight-bold">Self-paced</p>
-                <p className="mb-0 text-muted">Progress at your own speed</p>
-              </div>
-            </div>
-          </Row>
-        </div>
-      </div>
-    );
+  );
 
     content = (
       <div className="detail-page learning-path-detail-page">
@@ -440,7 +340,7 @@ const LearningPathDetailPage = () => {
                       courses={coursesForPath}
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
-                      enrollmentDateInLearningPath={enrollmentDate}
+                      isEnrolledInLearningPath={isEnrolledInLearningPath}
                       onCourseClick={handleCourseViewButton}
                     />
                   )}

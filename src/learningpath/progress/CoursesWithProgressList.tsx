@@ -6,14 +6,14 @@ import { Course } from './types';
 interface CoursesWithProgressListProps {
   courses?: Course[];
   learningPathId: string;
-  enrollmentDateInLearningPath?: string | null;
+  isEnrolledInLearningPath?: boolean | false;
   onCourseClick: (courseId: string) => void;
 }
 
 const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
   courses = [],
   learningPathId,
-  enrollmentDateInLearningPath = null,
+  isEnrolledInLearningPath = false,
   onCourseClick,
 }) => {
 
@@ -25,7 +25,7 @@ const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
           <CourseWithProgress
             course={course}
             learningPathId={learningPathId}
-            enrollmentDateInLearningPath={enrollmentDateInLearningPath}
+            isEnrolledInLearningPath={isEnrolledInLearningPath}
             onCourseClick={() => onCourseClick(course.id)}
           />
         </Col>

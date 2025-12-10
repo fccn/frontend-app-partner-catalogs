@@ -3,17 +3,13 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Card, Button, Chip, Icon } from '@openedx/paragon';
 import {
-  LmsCompletionSolid,
-  CheckCircle,
-  Timelapse,
-  AccessTime,
   BookOpen,
+  AccessTime,
   Check,
   ArrowForward,
   Settings,
-  RemoveRedEye,
 } from '@openedx/paragon/icons';
-import { useOrganizations, usePrefetchLearningPathDetail } from './data/queries';
+import { usePrefetchLearningPathDetail } from './data/queries';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 const LearningPathCard = ({ learningPath, showFilters = false }) => {
@@ -27,7 +23,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     status,
     minDate,
     maxDate,
-    org,
+    partner,
     isManager,
   } = learningPath;
 
@@ -40,24 +36,22 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   const prefetchLearningPathDetail = usePrefetchLearningPathDetail();
   const handleMouseEnter = () => prefetchLearningPathDetail(key);
 
-  let statusVariant = null;
-  let statusIcon = 'fa-circle';
-  let buttonText = 'View';
+  let statusVariant = 'pending';
+  let buttonText = 'View Catalog Info';
   let buttonIcon = Check;
-  let statusAltText = null;
+  let statusAltText = 'Self Enrollment';
 
   switch (status?.toLowerCase()) {
     case 'sent':
       statusVariant = 'pending';
       buttonText = 'View Catalog Info';
-      buttonIcon = RemoveRedEye
-      statusAltText = "Pending Invitation"
+      statusAltText = 'Pending Invitation';
       break;
     case 'accepted':
       statusVariant = 'accepted';
       buttonText = 'Go to the catalog';
-      buttonIcon = ArrowForward
-      statusAltText = "Active"
+      buttonIcon = ArrowForward;
+      statusAltText = 'Active';
       break;
     default:
       break;
@@ -105,14 +99,15 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
       ? `${subtitle} • ${duration} days`
       : subtitle || duration || '';
 
-  const { data: organizations = {} } = useOrganizations();
-  const orgData = useMemo(
-    () => ({
-      name: organizations[org]?.name || org,
-      logo: organizations[org]?.logo,
-    }),
-    [organizations, org],
-  );
+  const { partnerName, partnerLogo, partnerSlug } = useMemo(() => ({
+    partnerName: partner?.name || partner?.slug || '',
+    partnerLogo: partner?.logo,
+    partnerSlug: partner?.slug,
+  }), [partner]);
+
+  const learningPathUrl = partnerSlug
+    ? `/learningpath/${partnerSlug}/${key}`
+    : `/learningpath/${key}`;
 
   return (
     <Card
@@ -124,14 +119,12 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
       <Card.ImageCap
         src={image}
         srcAlt={`${displayName} catalog image`}
-        logoSrc={orgData.logo}
-        logoAlt={`${orgData.name} logo`}
+        logoSrc={partnerLogo}
+        logoAlt={partnerName ? `${partnerName} logo` : 'Partner logo'}
         className={orientation}
       />
 
-      {/* Keep balanced padding and center vertically */}
       <Card.Body className="px-4 py-4 d-flex align-items-center">
-        {/* Single horizontal flex row: left info + right actions */}
         <div
           className={`d-flex ${
             isSmall ? 'flex-column' : 'flex-row align-items-center justify-content-between'
@@ -145,9 +138,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
             <div className="d-flex flex-wrap gap-2 mb-2">
               {!!statusVariant && (
-                <Chip
-                  className={`status-chip status-${statusVariant}`}
-                >
+                <Chip className={`status-chip status-${statusVariant}`}>
                   {statusAltText ?? status.toUpperCase()}
                 </Chip>
               )}
@@ -193,12 +184,12 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
                   style={{ minWidth: '180px' }}
                   size="sm"
                 >
-                  Manage 
+                  Manage
                   <Icon src={Settings} />
                 </Button>
               </Link>
             )}
-            <Link to={`/learningpath/${org}/${key}`}>
+            <Link to={learningPathUrl}>
               <Button
                 variant="outline-primary"
                 className="w-100"
@@ -206,7 +197,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
                 size="sm"
               >
                 {buttonText}
-                <Icon src={buttonIcon} />
+                <Icon src={buttonIcon} className="pl-1" />
               </Button>
             </Link>
           </div>
@@ -227,7 +218,14 @@ LearningPathCard.propTypes = {
     status: PropTypes.string.isRequired,
     minDate: PropTypes.instanceOf(Date),
     maxDate: PropTypes.instanceOf(Date),
-    org: PropTypes.string,
+    partner: PropTypes.shape({
+      id: PropTypes.number,
+      slug: PropTypes.string.isRequired,
+      name: PropTypes.string,
+      homepageUrl: PropTypes.string,
+      logo: PropTypes.string,
+    }).isRequired,
+    isManager: PropTypes.bool,
   }).isRequired,
   showFilters: PropTypes.bool,
 };

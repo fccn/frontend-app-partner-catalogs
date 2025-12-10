@@ -60,7 +60,6 @@ export const useLearningPaths = () => {
           return {
             ...lp,
             numCourses: 0,
-            status: 'Sent',
             maxDate: null,
             percent: 0,
             type: 'learning_path',
@@ -71,13 +70,6 @@ export const useLearningPaths = () => {
 
         const progress = totalCompletion / totalCourses;
         const requiredCompletion = lp.requiredCompletion || 0;
-
-        let status = 'Accepted';
-        if (progress === 0) {
-          status = 'Sent';
-        } else if (progress >= requiredCompletion) {
-          status = 'Completed';
-        }
 
         let percent = 0;
         if (requiredCompletion > 0) {
@@ -94,7 +86,6 @@ export const useLearningPaths = () => {
           key: lp.id,
           displayName: lp.name,
           numCourses: totalCourses,
-          status,
           minDate,
           maxDate,
           percent,
@@ -249,7 +240,6 @@ export const useCoursesByIds = (courseIds) => {
             type: 'course',
             org: courseId ? courseId.match(/course-v1:([^+]+)/)?.[1] : null,
           });
-
           return {
             ...addCompletionStatus(detail, completionsMap, courseId),
             type: 'course',
@@ -257,7 +247,6 @@ export const useCoursesByIds = (courseIds) => {
           };
         }),
       );
-
       return results;
     },
     enabled: courseIds && courseIds.length > 0,

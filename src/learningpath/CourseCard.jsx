@@ -5,12 +5,7 @@ import {
   Card, Button, Col, ProgressBar, Chip, PageBanner, Icon,
 } from '@openedx/paragon';
 import {
-  LmsBook,
   AccessTime,
-  CheckCircle,
-  LmsCompletionSolid,
-  Timelapse,
-  Info,
   HowToReg,
   Calendar,
 } from '@openedx/paragon/icons';
@@ -23,20 +18,26 @@ import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 export const CourseCard = ({
-  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride,
+  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride, isEnrolledInCourse = false,
 }) => {
   const {
     name,
     org,
     courseImageAssetPath,
     startDate,
-    endDate,
     status,
-    percent,
     checkingEnrollment,
   } = course;
 
-  const { administrator } = getAuthenticatedUser();
+  const dateDisplay = startDate
+    ? new Date(startDate).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+    : null;
+
+
   const { isSmall, isMedium } = useScreenSize();
   const orientation = orientationOverride
     ? orientationOverride
@@ -50,26 +51,18 @@ export const CourseCard = ({
     prefetchCourseDetail();
   };
 
-  const progressBarPercent = useMemo(() => +(percent * 100).toFixed(1), [percent]);
-
   const linkTo = buildCourseHomeUrl(course.id);
 
-  let statusVariant = 'dark';
-  let statusIcon = 'fa-circle';
   let buttonText = 'Start Course';
+
   switch (status?.toLowerCase()) {
     case 'completed':
-      statusVariant = 'success';
-      statusIcon = CheckCircle;
+      buttonText = 'View Certificate';
       break;
     case 'not started':
-      statusVariant = 'secondary';
-      statusIcon = LmsCompletionSolid;
       buttonText = 'Start Course';
       break;
     case 'in progress':
-      statusVariant = 'info';
-      statusIcon = Timelapse;
       buttonText = 'Continue';
       break;
     default:
@@ -80,14 +73,7 @@ export const CourseCard = ({
     buttonText = 'Loading...';
   }
 
-  const disableStartButton = !administrator && (checkingEnrollment || isEnrolledInLearningPath === false);
-  let showStartButton = true;
-
-  let accessText = '';
-  const currentDate = new Date();
-
-  const startDateObj = startDate ? new Date(startDate) : null;
-  const endDateObj = endDate ? new Date(endDate) : null;
+  const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
 
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
@@ -99,7 +85,7 @@ export const CourseCard = ({
     <>
       <Card
         orientation={orientation}
-        className={`h-full hover:shadow-lg transition-shadow ${orientation}`}
+        className={`h-full hover:shadow-lg transition-shadow ${orientation} mb-4`}
         onMouseEnter={handleMouseEnter}
       >
         <Card.ImageCap
@@ -120,7 +106,7 @@ export const CourseCard = ({
             >
               <Icon
                 src={HowToReg}
-                size={18}
+                size={"md"}
                 className="text-blue-600 flex-none"
               />
               <span className="text-sm">10 Enrolled</span>
@@ -133,6 +119,7 @@ export const CourseCard = ({
             >
               <Icon
                 src={AccessTime}
+                size={"md"}
                 className="text-blue-600 flex-none"
               />
               <span className="text-sm">20 Hours</span>
@@ -145,9 +132,10 @@ export const CourseCard = ({
             >
               <Icon
                 src={Calendar}
+                size={"md"}
                 className="text-blue-600 flex-none"
               />
-              <span className="text-sm">Starts 2025-12-02</span>
+              <span className="text-sm">Starts {dateDisplay}</span>
             </div>
           </div>
         </Card.Section>
@@ -165,15 +153,17 @@ export const CourseCard = ({
             >
               More Details
             </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex-fill py-2"
-              onClick={disableStartButton}
-            >
-              { buttonText }
-            </Button>
+            
+            {!disableStartButton && (
+              <Button
+                variant="primary"
+                size="sm"
+                className="flex-fill py-2"
+                onClick={onClick}
+              >
+                { buttonText }
+              </Button>
+            )}
           </div>
         </Card.Footer>
       </Card>
@@ -251,6 +241,7 @@ export const CourseCardWithEnrollment = ({
       onClickViewButton={onClick}
       isEnrolledInLearningPath={isEnrolledInLearningPath}
       orientationOverride={orientationOverride}
+      isEnrolledInCourse={courseWithEnrollment.isEnrolledInCourse}
     />
   );
 };
