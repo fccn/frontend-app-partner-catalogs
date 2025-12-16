@@ -106,8 +106,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   }), [partner]);
 
   const learningPathUrl = partnerSlug
-    ? `/learningpath/${partnerSlug}/${key}`
-    : `/learningpath/${key}`;
+    ? `/catalog/${partnerSlug}/${key}`
+    : `/catalog/${key}`;
 
   return (
     <Card
@@ -177,7 +177,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             } flex-column justify-content-center align-items-end`}
           >
             {isManager && (
-              <Link to={`/learningpath/${key}`}>
+              <Link to={`/catalog/${key}`}>
                 <Button
                   variant="dark"
                   className="w-100"

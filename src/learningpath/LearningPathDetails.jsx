@@ -1,14 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Container, Col,
+  Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
 } from '@openedx/paragon';
 import {
   Person,
   Award,
   Calendar,
-  FormatListBulleted,
-  AccessTimeFilled,
   ChevronLeft,
   BookOpen,
   Check,
@@ -17,6 +15,7 @@ import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
 } from './data/queries';
 import CourseDetailPage from './CourseDetails';
+import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { buildCourseAboutUrl } from './utils';  
@@ -53,6 +52,29 @@ const LearningPathDetailPage = () => {
       setActiveTab(detail.enrollmentDate ? 'courses' : 'about');
     }
   }, [detail, activeTab]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDoNotShare = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleAllowAndContinue = async () => {
+    if (detail && !detail.enrollmentDate) {
+      setEnrolling(true);
+      setIsModalOpen(false);
+      try {
+        await enrollMutation.mutateAsync(key);
+        setLocalStatus('accepted');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Enrollment failed:', error);
+      } finally {
+        setActiveTab('courses');
+        setEnrolling(false);
+      }
+    }
+  };
 
   const courseIds = useMemo(() => (detail && detail.steps ? detail.steps.map(step => step.courseKey) : []), [detail]);
 
@@ -92,19 +114,7 @@ const LearningPathDetailPage = () => {
   };
 
   const handleEnrollClick = async () => {
-    if (detail && !detail.enrollmentDate) {
-      setEnrolling(true);
-      try {
-        await enrollMutation.mutateAsync(key);
-        setLocalStatus('accepted');
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Enrollment failed:', error);
-      } finally {
-        setActiveTab('courses');
-        setEnrolling(false);
-      }
-    }
+    setIsModalOpen(true);
   };
 
   // TODO: Retrieve this from the backend.
@@ -216,6 +226,7 @@ const LearningPathDetailPage = () => {
                     {detail?.courses != null && (
                       <Chip
                         iconBefore={BookOpen}
+                        variant="light"
                         className="border-0 mb-2"
                       >
                         {detail.courses} courses
@@ -348,6 +359,14 @@ const LearningPathDetailPage = () => {
               </div>
             </div>
           )}
+
+          <DataSharingAuthorizationModal
+            isOpen={isModalOpen}
+            onClose={handleDoNotShare}
+            onAllow={handleAllowAndContinue}
+            partnerName={detail.partner.name}
+            additionalMessage={detail.authorizationMessage}
+          />
         </div>
       </div>
     );
