@@ -195,18 +195,15 @@ const Dashboard = () => {
     () => items.filter(item => {
       const effectiveStatus = getEffectiveStatus(item);
 
-      const statusMatch =
-        selectedStatuses.length === 0
+      const statusMatch = selectedStatuses.length === 0
         || (effectiveStatus && selectedStatuses.includes(effectiveStatus));
 
       const dateStatus = getDateStatus(item);
-      const dateStatusMatch =
-        selectedDateStatuses.length === 0
+      const dateStatusMatch = selectedDateStatuses.length === 0
         || selectedDateStatuses.includes(dateStatus);
 
       const orgSlug = item.partner?.slug;
-      const orgMatch =
-        selectedOrgs.length === 0
+      const orgMatch = selectedOrgs.length === 0
         || (orgSlug && selectedOrgs.includes(orgSlug));
 
       const searchMatch = searchQuery === ''
@@ -220,9 +217,9 @@ const Dashboard = () => {
 
   const sortedItems = useMemo(() => {
     const statusOrder = {
-      'sent': 1,
-      'accepted': 2,
-      'completed': 3,
+      sent: 1,
+      accepted: 2,
+      completed: 3,
       'self enrollment': 4,
     };
     const dateStatusOrder = { Upcoming: 1, Open: 2, Ended: 3 };
@@ -313,8 +310,9 @@ const Dashboard = () => {
               </div>
             )}
             <div className={`dashboard-content ${showFilters ? 'shifted' : ''} ${showFilters && isSmall ? 'd-none' : ''}`}>
-              <div className="dashboard-header d-flex justify-content-between align-items-center">
-                <h2>My Catalogs</h2>
+              <h2>My Catalogs</h2>
+
+              <div className="d-flex align-items-center">
                 {!isSmall ? (
                   <SearchField
                     onClear={() => setSearchQuery('')}
@@ -328,7 +326,7 @@ const Dashboard = () => {
                     <IconButton
                       src={Search}
                       iconAs={Icon}
-                      variant="black"
+                      variant="secondary"
                       alt="Search"
                       onClick={handleMobileSearchClick}
                     />
@@ -336,18 +334,29 @@ const Dashboard = () => {
                       <IconButton
                         src={FilterList}
                         iconAs={Icon}
-                        variant="black"
+                        variant="secondary"
                         alt="Filter"
                         onClick={() => setShowFilters(true)}
                       />
                       {activeFiltersCount > 0 && (
-                        <Bubble className="position-absolute mt-4 ml-n3.5">
-                          {activeFiltersCount}
-                        </Bubble>
+                      <Bubble className="position-absolute mt-4 ml-n3.5">
+                        {activeFiltersCount}
+                      </Bubble>
                       )}
                     </div>
                   </div>
                 )}
+
+                {!showFilters && !isSmall && (
+                  <Button
+                    onClick={() => setShowFilters(true)}
+                    variant="outline-primary"
+                    className="filter-button"
+                  >
+                    <Icon src={FilterAlt} /> Filter
+                  </Button>
+                )}
+
               </div>
 
               {isSmall && showMobileSearch && (
@@ -363,22 +372,9 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <div className="d-flex justify-content-between align-items-center">
-                {!showFilters && !isSmall && (
-                  <Button
-                    onClick={() => setShowFilters(true)}
-                    variant="secondary"
-                    className="filter-button border-0"
-                  >
-                    <Icon src={FilterAlt} /> Filter
-                  </Button>
-                )}
-                <div className="small text-muted">
-                  Showing <b>{showingCount}</b> of <b>{totalCount}</b>
-                </div>
+              <div className="small text-muted">
+                Showing <b>{showingCount}</b> of <b>{totalCount}</b>
               </div>
-
-              <hr className={`mt-0 mb-4 ${showFilters || isSmall ? 'invisible' : 'visible'}`} />
 
               {sortedItems.length === 0 ? (
                 <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">

@@ -111,13 +111,6 @@
     }
 
     button {
-      margin-top: 1rem;
-      margin-bottom: 20px;
-
-      &.filter-button, &.filter-button:hover, &.filter-button:active, &.page-link.btn-primary {
-        background-color: var(--crimson) !important;
-      }
-
       &.page-link {
         border-radius: 0;
       }
@@ -374,7 +367,7 @@
       font-weight: 400;
     }
 
-    &.status-pending {
+    &:is(.status-pending, .status-sent) {
       background-color: #FEBE46B2;
   
       .pgn__chip__label,
