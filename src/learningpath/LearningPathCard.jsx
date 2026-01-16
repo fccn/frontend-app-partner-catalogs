@@ -1,20 +1,50 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Card, Button, Chip, Icon } from '@openedx/paragon';
+import {
+  Card, Button, Chip, Icon,
+  Stack,
+} from '@openedx/paragon';
 import {
   BookOpen,
   AccessTime,
   Check,
   ArrowForward,
   Settings,
+  RemoveRedEye,
 } from '@openedx/paragon/icons';
 import { usePrefetchLearningPathDetail } from './data/queries';
 import { useScreenSize } from '../hooks/useScreenSize';
 
+const statusActions = {
+  pending: ['pending'],
+  accepted: ['accepted'],
+  sent: ['sent', 'pending'],
+  upcoming: ['upcoming'],
+};
+
+const cardButtons = {
+  pending: {
+    buttonText: 'View Catalog Info',
+    buttonIcon: RemoveRedEye,
+  },
+  accepted: {
+    buttonText: 'Go to the catalog',
+    buttonIcon: ArrowForward,
+  },
+  sent: {
+    buttonText: 'Accept Invitation',
+    buttonIcon: Check,
+  },
+  upcoming: {
+    buttonText: 'View',
+    buttonIcon: ArrowForward,
+  },
+};
+
 const LearningPathCard = ({ learningPath, showFilters = false }) => {
   const {
-    key,
+    id,
     image,
     displayName,
     subtitle,
@@ -27,30 +57,25 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     isManager,
   } = learningPath;
 
+  const learningPathStatus = status?.toLowerCase();
   const { isSmall, isMedium } = useScreenSize();
-  const orientation =
-    (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
-      ? 'vertical'
-      : 'horizontal';
+  const orientation = (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
+    ? 'vertical'
+    : 'horizontal';
 
   const prefetchLearningPathDetail = usePrefetchLearningPathDetail();
-  const handleMouseEnter = () => prefetchLearningPathDetail(key);
+  const handleMouseEnter = () => prefetchLearningPathDetail(id);
 
   let statusVariant = 'pending';
-  let buttonText = 'View Catalog Info';
-  let buttonIcon = Check;
   let statusAltText = 'Self Enrollment';
 
-  switch (status?.toLowerCase()) {
+  switch (learningPathStatus) {
     case 'sent':
-      statusVariant = 'pending';
-      buttonText = 'View Catalog Info';
+      statusVariant = 'sent';
       statusAltText = 'Pending Invitation';
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      buttonText = 'Go to the catalog';
-      buttonIcon = ArrowForward;
       statusAltText = 'Active';
       break;
     default:
@@ -70,7 +95,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
         Access starts on <b>{d}</b>
       </>
     );
-    buttonText = 'View';
+    statusVariant = 'upcoming';
   } else if (maxDate) {
     const d = maxDate.toLocaleDateString('en-US', {
       month: 'short',
@@ -83,8 +108,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
           Access ended on <b>{d}</b>
         </>
       );
-      buttonText = 'View';
-      if (status.toLowerCase() !== 'completed') statusVariant = '';
+      statusVariant = 'upcoming';
+      if (status.toLowerCase() !== 'completed') { statusVariant = ''; }
     } else {
       accessText = (
         <>
@@ -94,10 +119,9 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     }
   }
 
-  const subtitleLine =
-    subtitle && duration
-      ? `${subtitle} • ${duration} days`
-      : subtitle || duration || '';
+  const subtitleLine = subtitle && duration
+    ? `${subtitle} • ${duration} days`
+    : subtitle || duration || '';
 
   const { partnerName, partnerLogo, partnerSlug } = useMemo(() => ({
     partnerName: partner?.name || partner?.slug || '',
@@ -106,8 +130,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   }), [partner]);
 
   const learningPathUrl = partnerSlug
-    ? `/catalog/${partnerSlug}/${key}`
-    : `/catalog/${key}`;
+    ? `/catalog/${partnerSlug}/${id}`
+    : `/catalog/${id}`;
 
   return (
     <Card
@@ -177,7 +201,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             } flex-column justify-content-center align-items-end`}
           >
             {isManager && (
-              <Link to={`/catalog/${key}`}>
+              <Link to={`/catalog/${id}`}>
                 <Button
                   variant="dark"
                   className="w-100"
@@ -189,17 +213,20 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
                 </Button>
               </Link>
             )}
-            <Link to={learningPathUrl}>
-              <Button
-                variant="outline-primary"
-                className="w-100"
-                style={{ minWidth: '180px' }}
-                size="sm"
-              >
-                {buttonText}
-                <Icon src={buttonIcon} className="pl-1" />
-              </Button>
-            </Link>
+            <Stack gap={3}>
+              {statusActions[statusVariant].map((s) => (
+                <Link to={learningPathUrl}>
+                  <Button
+                    variant="outline-dark"
+                    className="long-button w-100"
+                    size="sm"
+                  >
+                    {cardButtons[s].buttonText}
+                    <Icon src={cardButtons[s].buttonIcon} className="pl-1" />
+                  </Button>
+                </Link>
+              ))}
+            </Stack>
           </div>
         </div>
       </Card.Body>
@@ -209,7 +236,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
 LearningPathCard.propTypes = {
   learningPath: PropTypes.shape({
-    key: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     image: PropTypes.string,
     displayName: PropTypes.string.isRequired,
     subtitle: PropTypes.string,
