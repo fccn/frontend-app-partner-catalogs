@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalDialog, Button, Alert, Stack } from '@openedx/paragon';
+import {
+  ModalDialog, Button, Alert, Stack,
+} from '@openedx/paragon';
 
 export default function DataSharingAuthorizationModal({
   isOpen,
@@ -10,14 +12,14 @@ export default function DataSharingAuthorizationModal({
   additionalMessage,
 }) {
   return (
-    <ModalDialog 
-        isOpen={isOpen}
-        onClose={onClose}
-        size="lg"
-        className='p-4 pt-5'
-        title="Data Sharing Authorization"
-        isOverflowVisible={false}
-        hasCloseButton
+    <ModalDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      className="p-4 pt-5"
+      title="Data Sharing Authorization"
+      isOverflowVisible={false}
+      hasCloseButton
     >
       <ModalDialog.Header>
         <ModalDialog.Title>Data Sharing Authorization</ModalDialog.Title>
@@ -27,24 +29,30 @@ export default function DataSharingAuthorizationModal({
         <Stack gap={3}>
           <div>
             <p className="mb-2">
-              To enroll in this course through the <strong>{partnerName}</strong> catalog, we need your permission
-              to share certain information about your activity in this course with <strong>{partnerName}</strong>.
-              This information will be used solely for tracking and reporting purposes within their training program.
+              To enroll in this course through the <strong>{partnerName}</strong> catalog, we need your permission to
+              share certain information about your activity in this course with <strong>{partnerName}</strong>. This
+              information will be used solely for tracking and reporting purposes within their training program.
             </p>
 
             {additionalMessage ? (
-              <div className="border-top border-bottom border-light py-3 mt-3">
-                {additionalMessage}
-              </div>
+              <div className="border-top border-bottom border-light py-3 mt-3">{additionalMessage}</div>
             ) : null}
           </div>
 
           <div>
-            <p className="mb-2"><strong>By allowing data sharing, you confirm that:</strong></p>
+            <p className="mb-2">
+              <strong>By allowing data sharing, you confirm that:</strong>
+            </p>
             <ul className="mb-0">
               <li>You have been invited or your email is eligible for this corporate catalog.</li>
-              <li>You understand that the shared information includes data such as your course progress, grades, and completion status.</li>
-              <li>You consent to <strong>{partnerName}</strong> receiving this information in accordance with applicable data protection laws (GDPR).</li>
+              <li>
+                You understand that the shared information includes data such as your course progress, grades, and
+                completion status.
+              </li>
+              <li>
+                You consent to <strong>{partnerName}</strong> receiving this information in accordance with applicable
+                data protection laws (GDPR).
+              </li>
             </ul>
           </div>
 

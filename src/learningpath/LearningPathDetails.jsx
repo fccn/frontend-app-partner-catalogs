@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
+  Stack,
 } from '@openedx/paragon';
 import {
   Person,
@@ -10,6 +11,7 @@ import {
   ChevronLeft,
   BookOpen,
   Check,
+  AccessTimeFilled,
 } from '@openedx/paragon/icons';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
@@ -18,17 +20,16 @@ import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
-import { buildCourseAboutUrl } from './utils';  
+import { buildCourseAboutUrl } from './utils';
 
 const LearningPathDetailPage = () => {
-  const { isSmall } = useScreenSize();
+  const { isMedium, isLarge } = useScreenSize();
   const { org, key } = useParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
   const [localStatus, setLocalStatus] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
-
 
   const handleCollapsibleToggle = (collapsibleId) => {
     setOpenCollapsible(openCollapsible === collapsibleId ? null : collapsibleId);
@@ -130,17 +131,17 @@ const LearningPathDetailPage = () => {
 
   const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
   const isEnrolledInLearningPath = status === 'accepted';
-  let statusVariant = "pending";
-  let statusAltText = "Self Enrollment";
+  let statusVariant = 'pending';
+  let statusAltText = 'Self Enrollment';
 
   switch (status) {
     case 'sent':
       statusVariant = 'pending';
-      statusAltText = "Pending Invitation";
+      statusAltText = 'Pending Invitation';
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      statusAltText = "Active";
+      statusAltText = 'Active';
       break;
     default:
       break;
@@ -175,23 +176,22 @@ const LearningPathDetailPage = () => {
       enrollmentDate,
     } = detail;
 
-  const detailSection = (
-    <div className="hero px-4 px-md-6 pt-4">
-      <div className="hero-inner mx-auto">
+    const detailSection = (
+      <div className="hero px-4 px-md-6 py-4 bg-gray-100">
         <div className="mb-4">
           <Link
             to="/"
             className="d-flex align-items-center text-decoration-none"
           >
             <Icon src={ChevronLeft} className="mr-2" />
-            <span className="font-weight-bold">
+            <span>
               Back to My Catalogs
             </span>
           </Link>
         </div>
 
         <Card
-          orientation={isSmall ? 'vertical' : 'horizontal'}
+          orientation={isMedium ? 'vertical' : 'horizontal'}
           className="w-100"
         >
           <Card.ImageCap
@@ -201,121 +201,121 @@ const LearningPathDetailPage = () => {
             logoAlt={`${orgData?.name} logo`}
           />
 
-          <Card.Body className="px-4 px-md-5 py-4 py-md-5">
-            <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center">
-              <div className="flex-grow-1 mr-lg-4">
-                <Card.Section className="pt-1 pb-2">
-                  <h1 className="mb-2">
-                    {name}
-                  </h1>
-                  <div
-                    className="text-muted mb-3"
-                    dangerouslySetInnerHTML={{
-                      __html: detail?.partner?.name || orgData?.name || '',
-                    }}
-                  />
-                  <div className="d-flex align-items-center flex-wrap">
-                    {statusAltText && (
-                      <Chip
-                        className={`status-chip status-${statusVariant} mr-2 mb-2 px-4`}
-                      >
-                        {statusAltText}
-                      </Chip>
-                    )}
+          <Card.Body className="px-4 px-md-5 py-2 bg-gray-100">
+            <Stack direction={isLarge ? 'vertical' : 'horizontal'} gap={4} className="justify-content-between">
 
-                    {detail?.courses != null && (
-                      <Chip
-                        iconBefore={BookOpen}
-                        variant="light"
-                        className="border-0 mb-2"
-                      >
-                        {detail.courses} courses
-                      </Chip>
-                    )}
-                  </div>
-                </Card.Section>
-              </div>
+              <Card.Section className="pt-1 pb-2">
+                <h1 className="mb-2">
+                  {name}
+                </h1>
+                <div
+                  className="text-muted mb-3"
+                  dangerouslySetInnerHTML={{
+                    __html: detail?.partner?.name || orgData?.name || '',
+                  }}
+                />
+                <div className="d-flex align-items-center flex-wrap">
+                  {statusAltText && (
+                  <Chip
+                    className={`status-chip status-${statusVariant} mr-2 mb-2 px-4`}
+                  >
+                    {statusAltText}
+                  </Chip>
+                  )}
+
+                  {detail?.courses != null && (
+                  <Chip
+                    iconBefore={BookOpen}
+                    variant="light"
+                    className="courses-counter border-0 mb-2 bg-gray-100"
+                  >
+                    {detail.courses} courses
+                  </Chip>
+                  )}
+                </div>
+              </Card.Section>
 
               {status !== 'accepted' && (
-                <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
-                  <Button
-                    size="md"
-                    className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
-                    onClick={handleEnrollClick}
-                    disabled={enrolling}
-                  >
-                    {(() => {
-                        if (enrolling) return 'Enrolling...';
-                        if (enrollmentDate) return 'Enrolled';
-                        if (status === 'sent') return 'Accept the invitation';
-                        return "Self Enrollment"
-                      })()}
-                    <Icon src={Check} className="ml-2" />
-                  </Button>
-                </div>
+              <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
+                <Button
+                  size="md"
+                  className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
+                  onClick={handleEnrollClick}
+                  disabled={enrolling}
+                >
+                  {(() => {
+                    if (enrolling) { return 'Enrolling...'; }
+                    if (enrollmentDate) { return 'Enrolled'; }
+                    if (status === 'sent') { return 'Accept the invitation'; }
+                    return 'Self Enrollment';
+                  })()}
+                  <Icon src={Check} className="ml-2" />
+                </Button>
+              </div>
               )}
-            </div>
+            </Stack>
+
           </Card.Body>
         </Card>
+      </div>
+    );
 
-        <Row className="my-4 mx-0 hero-info lp-hero-info gy-3">
+    content = (
+      <div className="detail-page learning-path-detail-page">
+        {detailSection}
+
+        <Row className="py-5 mx-0 hero-info lp-hero-info gy-3 border-bottom border-gray-100 bg-white">
           {accessUntilDate && (
-            <Col xs={12} sm={6} md="auto" className="d-flex">
-              <Icon src={AccessTimeFilled} className="mr-3 mt-1" />
-              <div>
-                <p className="mb-0 font-weight-bold">
-                  {accessUntilDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </p>
-                <p className="mb-0 text-muted">Access ends</p>
-              </div>
-            </Col>
+          <Col xs={12} sm={6} md="auto" className="d-flex">
+            <Icon src={AccessTimeFilled} className="mr-3 mt-1" />
+            <div>
+              <p className="mb-0 font-weight-bold">
+                {accessUntilDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </p>
+              <p className="mb-0">Access ends</p>
+            </div>
+          </Col>
           )}
 
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Award} className="mr-3 mt-1" />
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Award} size="lg" className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">Certificate</p>
-              <p className="mb-0 text-muted">
+              <p className="mb-0">
                 Courses include certification
               </p>
             </div>
           </Col>
 
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Calendar} className="mr-3 mt-1" />
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Calendar} size="lg" className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">
                 {duration || 'Duration not available'}
               </p>
-              <p className="mb-0 text-muted">
+              <p className="mb-0">
                 {timeCommitment || 'Duration'}
               </p>
             </div>
           </Col>
 
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Person} className="mr-3 mt-1" />
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Person} size="lg" className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">Self-paced</p>
-              <p className="mb-0 text-muted">
+              <p className="mb-0">
                 Progress at your own speed
               </p>
             </div>
           </Col>
         </Row>
-      </div>
-    </div>
-  );
 
-    content = (
-      <div className="detail-page learning-path-detail-page">
-        {detailSection}
         <div className="py-3 lp-info">
-          {isSmall ? (
+          {isMedium ? (
             <div className="mobile-content px-3">
               <Collapsible
                 title="Courses"

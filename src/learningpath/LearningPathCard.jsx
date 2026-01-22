@@ -182,7 +182,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
             <div className="d-flex flex-wrap gap-3 align-items-center">
               {numCourses !== undefined && numCourses !== null && (
-                <Chip iconBefore={BookOpen} className="border-0 p-0">
+                <Chip iconBefore={BookOpen} className="courses-counter border-0 p-0">
                   {numCourses} courses
                 </Chip>
               )}
