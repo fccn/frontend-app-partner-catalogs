@@ -37,13 +37,10 @@ export const CourseCard = ({
     })
     : null;
 
-
   const { isSmall, isMedium } = useScreenSize();
-  const orientation = orientationOverride
-    ? orientationOverride
-    : (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
-      ? 'vertical'
-      : 'horizontal';
+  const orientation = orientationOverride || ((showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
+    ? 'vertical'
+    : 'horizontal');
 
   // Prefetch the course detail when the user hovers over the card.
   const prefetchCourseDetail = usePrefetchCourseDetail(course.id);
@@ -82,92 +79,90 @@ export const CourseCard = ({
   }), [organizations, org]);
 
   return (
-    <>
-      <Card
-        orientation={orientation}
-        className={`h-full hover:shadow-lg transition-shadow ${orientation} mb-4`}
-        onMouseEnter={handleMouseEnter}
-      >
-        <Card.ImageCap
-          src={buildAssetUrl(courseImageAssetPath)}
-          srcAlt={`${name} course image`}
-          logoSrc={orgData.logo}
-          logoAlt={`${orgData.name} logo`}
-        />
+    <Card
+      orientation={orientation}
+      className={`h-full hover:shadow-lg transition-shadow ${orientation} mb-4`}
+      onMouseEnter={handleMouseEnter}
+    >
+      <Card.ImageCap
+        src={buildAssetUrl(courseImageAssetPath)}
+        srcAlt={`${name} course image`}
+        logoSrc={orgData.logo}
+        logoAlt={`${orgData.name} logo`}
+      />
 
-        <Card.Header title={name} subtitle={orgData.name} size="md" />
+      <Card.Header title={name} subtitle={orgData.name} size="md" />
 
-        <Card.Section>
-          <div className="space-y-3">
-            {/* Enrolled Count */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={HowToReg}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">10 Enrolled</span>
-            </div>
-
-            {/* Duration */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={AccessTime}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">20 Hours</span>
-            </div>
-
-            {/* Start Date */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={Calendar}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">Starts {dateDisplay}</span>
-            </div>
-          </div>
-        </Card.Section>
-
-        <Card.Footer>
+      <Card.Section>
+        <div className="space-y-3">
+          {/* Enrolled Count */}
           <div
-            className="d-flex flex-column flex-lg-row w-100"
-            style={{ gap: '12px' }}
+            className="text-gray-600"
+            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
           >
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="flex-fill py-2"
-              onClick={onClickViewButton}
-            >
-              More Details
-            </Button>
-            
-            {!disableStartButton && (
-              <Button
-                variant="primary"
-                size="sm"
-                className="flex-fill py-2"
-                onClick={onClick}
-              >
-                { buttonText }
-              </Button>
-            )}
+            <Icon
+              src={HowToReg}
+              size="md"
+              className="text-blue-600 flex-none"
+            />
+            <span className="text-sm">10 Enrolled</span>
           </div>
-        </Card.Footer>
-      </Card>
-    </>
+
+          {/* Duration */}
+          <div
+            className="text-gray-600"
+            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+          >
+            <Icon
+              src={AccessTime}
+              size="md"
+              className="text-blue-600 flex-none"
+            />
+            <span className="text-sm">20 Hours</span>
+          </div>
+
+          {/* Start Date */}
+          <div
+            className="text-gray-600"
+            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+          >
+            <Icon
+              src={Calendar}
+              size="md"
+              className="text-blue-600 flex-none"
+            />
+            <span className="text-sm">Starts {dateDisplay}</span>
+          </div>
+        </div>
+      </Card.Section>
+
+      <Card.Footer>
+        <div
+          className="d-flex flex-column flex-lg-row w-100"
+          style={{ gap: '12px' }}
+        >
+          <Button
+            variant="outline-dark"
+            size="sm"
+            className="flex-fill py-2"
+            onClick={onClickViewButton}
+          >
+            More Details
+          </Button>
+
+          {!disableStartButton && (
+          <Button
+            variant="dark"
+            size="sm"
+            className="flex-fill py-2"
+            onClick={onClick}
+          >
+            { buttonText }
+          </Button>
+          )}
+        </div>
+      </Card.Footer>
+    </Card>
   );
 };
 
