@@ -177,8 +177,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
             <div className="d-flex flex-wrap gap-2 mb-2">
               {isManager && (
-                <Chip>
-                  Manager
+                <Chip className="chip-manager">
+                  Catalog Manager
                 </Chip>
               )}
             </div>
