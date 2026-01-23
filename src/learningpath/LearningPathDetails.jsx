@@ -13,6 +13,7 @@ import {
   Check,
   AccessTimeFilled,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
   useLearningPaths,
@@ -22,8 +23,10 @@ import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { buildCourseAboutUrl } from './utils';
+import messages from './message';
 
 const LearningPathDetailPage = () => {
+  const { formatMessage } = useIntl();
   const { isMedium, isLarge } = useScreenSize();
   const { org, key: catalogId } = useParams();
   const [queryParams] = useSearchParams();
@@ -145,16 +148,16 @@ const LearningPathDetailPage = () => {
   const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
   const isEnrolledInLearningPath = status === 'accepted';
   let statusVariant = 'pending';
-  let statusAltText = 'Self Enrollment';
+  let statusAltText = formatMessage(messages.selfEnrollment);
 
   switch (status) {
     case 'sent':
       statusVariant = 'pending';
-      statusAltText = 'Pending Invitation';
+      statusAltText = formatMessage(messages.pendingInvitation);
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      statusAltText = 'Active';
+      statusAltText = formatMessage(messages.activeStatus);
       break;
     default:
       break;
@@ -170,10 +173,10 @@ const LearningPathDetailPage = () => {
   } else if (detailError || !detail) {
     content = (
       <div className="p-4">
-        <p>Failed to load detail</p>
+        <p>{formatMessage(messages.failedToLoadDetail)}</p>
         <Link to="/">
           <Icon src={ChevronLeft} />
-          <span>Back to My Catalogs</span>
+          <span>{formatMessage(messages.backToMyCatalogs)}</span>
         </Link>
       </div>
     );
@@ -198,7 +201,7 @@ const LearningPathDetailPage = () => {
           >
             <Icon src={ChevronLeft} className="mr-2" />
             <span>
-              Back to My Catalogs
+              {formatMessage(messages.backToMyCatalogs)}
             </span>
           </Link>
         </div>
@@ -242,7 +245,7 @@ const LearningPathDetailPage = () => {
                     variant="light"
                     className="courses-counter border-0 mb-2 bg-gray-100"
                   >
-                    {detail.courses} courses
+                    {formatMessage(messages.coursesCount, { count: detail.courses })}
                   </Chip>
                   )}
                 </div>
@@ -257,10 +260,10 @@ const LearningPathDetailPage = () => {
                   disabled={enrolling}
                 >
                   {(() => {
-                    if (enrolling) { return 'Enrolling...'; }
-                    if (enrollmentDate) { return 'Enrolled'; }
-                    if (status === 'sent') { return 'Accept the invitation'; }
-                    return 'Self Enrollment';
+                    if (enrolling) { return formatMessage(messages.enrolling); }
+                    if (enrollmentDate) { return formatMessage(messages.enrolled); }
+                    if (status === 'sent') { return formatMessage(messages.acceptInvitationText); }
+                    return formatMessage(messages.selfEnrollment);
                   })()}
                   <Icon src={Check} className="ml-2" />
                 </Button>
@@ -289,7 +292,7 @@ const LearningPathDetailPage = () => {
                   year: 'numeric',
                 })}
               </p>
-              <p className="mb-0">Access ends</p>
+              <p className="mb-0">{formatMessage(messages.accessEnds)}</p>
             </div>
           </Col>
           )}
@@ -297,9 +300,9 @@ const LearningPathDetailPage = () => {
           <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
             <Icon src={Award} size="lg" className="mr-3 mt-1" />
             <div>
-              <p className="mb-0 font-weight-bold">Certificate</p>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.certificate)}</p>
               <p className="mb-0">
-                Courses include certification
+                {formatMessage(messages.coursesIncludeCertification)}
               </p>
             </div>
           </Col>
@@ -308,10 +311,10 @@ const LearningPathDetailPage = () => {
             <Icon src={Calendar} size="lg" className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">
-                {duration || 'Duration not available'}
+                {duration || formatMessage(messages.durationNotAvailable)}
               </p>
               <p className="mb-0">
-                {timeCommitment || 'Duration'}
+                {timeCommitment || formatMessage(messages.durationLabel)}
               </p>
             </div>
           </Col>
@@ -319,9 +322,9 @@ const LearningPathDetailPage = () => {
           <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
             <Icon src={Person} size="lg" className="mr-3 mt-1" />
             <div>
-              <p className="mb-0 font-weight-bold">Self-paced</p>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.selfPaced)}</p>
               <p className="mb-0">
-                Progress at your own speed
+                {formatMessage(messages.progressAtYourOwnSpeed)}
               </p>
             </div>
           </Col>
@@ -331,14 +334,14 @@ const LearningPathDetailPage = () => {
           {isMedium ? (
             <div className="mobile-content px-3">
               <Collapsible
-                title="Courses"
+                title={formatMessage(messages.coursesTitle)}
                 open={openCollapsible === 'courses'}
                 onToggle={() => handleCollapsibleToggle('courses')}
                 className="mb-2"
               >
                 <section id="courses">
                   {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>No sub-courses found in this learning path.</p>
+                    <p>{formatMessage(messages.noSubCourses)}</p>
                   )}
                   {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
                     <CoursesWithProgressList
@@ -357,7 +360,7 @@ const LearningPathDetailPage = () => {
               <div id="courses-section-wrapper">
                 <section id="courses">
                   {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>No sub-courses found in this learning path.</p>
+                    <p>{formatMessage(messages.noSubCourses)}</p>
                   )}
                   {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
                     <CoursesWithProgressList

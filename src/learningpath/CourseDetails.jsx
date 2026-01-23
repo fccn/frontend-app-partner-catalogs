@@ -21,10 +21,12 @@ import {
   Close,
   ChevronLeft,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { useCourseDetail, useOrganizations } from './data/queries';
 import { buildAssetUrl, replaceStaticAssetReferences } from '../util/assetUrl';
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
+import messages from './message';
 
 const CourseDetailContent = ({
   course,
@@ -32,6 +34,7 @@ const CourseDetailContent = ({
   onClose,
   learningPathTitle,
 }) => {
+  const { formatMessage } = useIntl();
   const {
     name,
     shortDescription,
@@ -73,7 +76,7 @@ const CourseDetailContent = ({
           <Row className="p-0 m-0 d-flex align-items-center modal-header">
             <Col xs={10}>
               <h4 className="mb-0 pl-4 text-muted font-weight-normal text-truncate">
-                <b>Learning Path:</b> {learningPathTitle}
+                <b>{formatMessage(messages.learningPathLabel)}</b> {learningPathTitle}
               </h4>
             </Col>
             <ModalCloseButton variant="tertiary" onClick={handleClose} className="mr-2 rounded-circle">
@@ -96,15 +99,15 @@ const CourseDetailContent = ({
             <Card.Section>
               <Link to="/" className="d-flex align-items-center back-link pl-4">
                 <Icon src={ChevronLeft} />
-                <span>Go Back</span>
+                <span>{formatMessage(messages.goBack)}</span>
               </Link>
             </Card.Section>
             )}
             <Card.Section className="pl-5 pr-6">
-              <Chip iconBefore={LmsBook} className="course-chip">COURSE</Chip>
+              <Chip iconBefore={LmsBook} className="course-chip">{formatMessage(messages.courseChip)}</Chip>
               <h1 className={`my-3 mt-4.5${isSmall ? ' h2' : ''}`}>{name}</h1>
               {/* eslint-disable-next-line react/no-danger */}
-              <div className="text-muted" dangerouslySetInnerHTML={{ __html: shortDescription || 'No description available.' }} />
+              <div className="text-muted" dangerouslySetInnerHTML={{ __html: shortDescription || formatMessage(messages.noDescription) }} />
             </Card.Section>
           </Card.Body>
           {!isSmall && (
@@ -122,15 +125,15 @@ const CourseDetailContent = ({
               <Icon src={AccessTimeFilled} className="mr-4 mb-3.5" />
               <div>
                 <p className="mb-0 font-weight-bold">{dateDisplay}</p>
-                <p className="mb-0 text-muted">Access ends</p>
+                <p className="mb-0 text-muted">{formatMessage(messages.accessEnds)}</p>
               </div>
             </div>
           )}
           <div className="d-flex align-items-center">
             <Icon src={Award} className="mr-4 mb-3.5" />
             <div>
-              <p className="mb-0 font-weight-bold">Certificate</p>
-              <p className="mb-0 text-muted">Earn a certificate</p>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.certificate)}</p>
+              <p className="mb-0 text-muted">{formatMessage(messages.earnCertificate)}</p>
             </div>
           </div>
           {duration && (
@@ -138,16 +141,16 @@ const CourseDetailContent = ({
               <Icon src={Calendar} className="mr-4 mb-3.5" />
               <div>
                 <p className="mb-0 font-weight-bold">{duration}</p>
-                <p className="mb-0 text-muted">Approx. duration</p>
+                <p className="mb-0 text-muted">{formatMessage(messages.approxDuration)}</p>
               </div>
             </div>
           )}
           <div className="d-flex align-items-center">
             <Icon src={Person} className="mr-4 mb-3.5" />
             <div>
-              <p className="mb-0 font-weight-bold">{selfPaced ? 'Self-paced' : 'Instructor-paced'}</p>
+              <p className="mb-0 font-weight-bold">{selfPaced ? formatMessage(messages.selfPaced) : formatMessage(messages.instructorPaced)}</p>
               <p className="mb-0 text-muted">
-                {selfPaced ? 'Progress at your own speed' : 'Follow the course schedule'}
+                {selfPaced ? formatMessage(messages.progressAtYourOwnSpeed) : formatMessage(messages.followCourseSchedule)}
               </p>
             </div>
           </div>
@@ -161,7 +164,7 @@ const CourseDetailContent = ({
             className="ml-auto rounded-0 py-3 px-5.5 "
             onClick={handleViewClick}
           >
-            View
+            {formatMessage(messages.view)}
           </Button>
         </div>
       )}
@@ -170,7 +173,7 @@ const CourseDetailContent = ({
         <section id="about">
           {/* eslint-disable-next-line react/no-danger */}
           <div dangerouslySetInnerHTML={{
-            __html: replaceStaticAssetReferences(description || shortDescription || 'No description available.', course.id),
+            __html: replaceStaticAssetReferences(description || shortDescription || formatMessage(messages.noDescription), course.id),
           }}
           />
         </section>
@@ -222,9 +225,9 @@ const CourseDetailPage = ({
   if (error) {
     return (
       <Alert variant="danger">
-        <Alert.Heading>Error loading course</Alert.Heading>
+        <Alert.Heading>{formatMessage(messages.errorLoadingCourse)}</Alert.Heading>
         <p>{error.message}</p>
-        <Link to="/">Return to dashboard</Link>
+        <Link to="/">{formatMessage(messages.returnToDashboard)}</Link>
       </Alert>
     );
   }
@@ -232,9 +235,9 @@ const CourseDetailPage = ({
   if (!course) {
     return (
       <Alert variant="info">
-        <Alert.Heading>Course not found</Alert.Heading>
-        <p>We couldn&apos;t find the requested course.</p>
-        <Link to="/">Return to dashboard</Link>
+        <Alert.Heading>{formatMessage(messages.courseNotFound)}</Alert.Heading>
+        <p>{formatMessage(messages.couldNotFindCourse)}</p>
+        <Link to="/">{formatMessage(messages.returnToDashboard)}</Link>
       </Alert>
     );
   }

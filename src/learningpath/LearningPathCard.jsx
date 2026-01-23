@@ -14,7 +14,9 @@ import {
   Settings,
   RemoveRedEye,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { usePrefetchLearningPathDetail } from './data/queries';
+import messages from './message';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 const statusActions = {
@@ -26,25 +28,26 @@ const statusActions = {
 
 const cardButtons = {
   pending: {
-    buttonText: 'View Catalog Info',
+    buttonMessageKey: 'viewCatalogInfo',
     buttonIcon: RemoveRedEye,
   },
   accepted: {
-    buttonText: 'Go to the catalog',
+    buttonMessageKey: 'goToCatalog',
     buttonIcon: ArrowForward,
   },
   sent: {
-    buttonText: 'Accept Invitation',
+    buttonMessageKey: 'acceptInvitationBtn',
     buttonIcon: Check,
     query: '?open=true',
   },
   upcoming: {
-    buttonText: 'View',
+    buttonMessageKey: 'view',
     buttonIcon: ArrowForward,
   },
 };
 
 const LearningPathCard = ({ learningPath, showFilters = false }) => {
+  const { formatMessage } = useIntl();
   const {
     id,
     image,
@@ -70,16 +73,16 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   const handleMouseEnter = () => prefetchLearningPathDetail(id);
 
   let statusVariant = 'pending';
-  let statusAltText = 'Self Enrollment';
+  let statusAltText = formatMessage(messages.selfEnrollment);
 
   switch (learningPathStatus) {
     case 'sent':
       statusVariant = 'sent';
-      statusAltText = 'Pending Invitation';
+      statusAltText = formatMessage(messages.pendingInvitation);
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      statusAltText = 'Active';
+      statusAltText = formatMessage(messages.activeStatus);
       break;
     default:
       break;
@@ -95,7 +98,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     });
     accessText = (
       <>
-        Access starts on <b>{d}</b>
+        {formatMessage(messages.accessStartsOnPrefix)} <b>{d}</b>
       </>
     );
     statusVariant = 'upcoming';
@@ -108,7 +111,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     if (now > maxDate) {
       accessText = (
         <>
-          Access ended on <b>{d}</b>
+          {formatMessage(messages.accessEndedOnPrefix)} <b>{d}</b>
         </>
       );
       statusVariant = 'upcoming';
@@ -116,7 +119,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     } else {
       accessText = (
         <>
-          Access until <b>{d}</b>
+          {formatMessage(messages.accessUntilPrefix)} <b>{d}</b>
         </>
       );
     }
@@ -178,7 +181,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             <div className="d-flex flex-wrap gap-2 mb-2">
               {isManager && (
                 <Chip className="chip-manager">
-                  Catalog Manager
+                  {formatMessage(messages.catalogManager)}
                 </Chip>
               )}
             </div>
@@ -190,7 +193,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             <div className="d-flex flex-wrap gap-3 align-items-center">
               {numCourses !== undefined && numCourses !== null && (
                 <Chip iconBefore={BookOpen} className="courses-counter border-0 p-0">
-                  {numCourses} courses
+                  {formatMessage(messages.coursesCount, { count: numCourses })}
                 </Chip>
               )}
               {accessText && (
@@ -217,21 +220,21 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
                   size="sm"
                 >
                   <Stack direction="horizontal" gap={2} className="align-items-center">
-                    Manage
+                    {formatMessage(messages.manage)}
                     <Icon src={Settings} />
                   </Stack>
                 </Button>
               </Link>
             )}
             {statusActions[statusVariant].map((s) => (
-              <Link to={`${learningPathUrl}${cardButtons[s].query || ''}`}>
+              <Link key={s} to={`${learningPathUrl}${cardButtons[s].query || ''}`}>
                 <Button
                   variant="outline-dark"
                   className="long-button dark-icon"
                   size="sm"
                 >
                   <Stack direction="horizontal" gap={2} className="align-items-center">
-                    {cardButtons[s].buttonText}
+                    {formatMessage(messages[cardButtons[s].buttonMessageKey])}
                     <Icon src={cardButtons[s].buttonIcon} className="pl-1" />
                   </Stack>
                 </Button>
