@@ -36,6 +36,7 @@ const cardButtons = {
   sent: {
     buttonText: 'Accept Invitation',
     buttonIcon: Check,
+    query: '?open=true',
   },
   upcoming: {
     buttonText: 'View',
@@ -223,7 +224,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
               </Link>
             )}
             {statusActions[statusVariant].map((s) => (
-              <Link to={learningPathUrl}>
+              <Link to={`${learningPathUrl}${cardButtons[s].query || ''}`}>
                 <Button
                   variant="outline-dark"
                   className="long-button dark-icon"

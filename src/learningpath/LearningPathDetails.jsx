@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
   Stack,
@@ -26,6 +26,7 @@ import { buildCourseAboutUrl } from './utils';
 const LearningPathDetailPage = () => {
   const { isMedium, isLarge } = useScreenSize();
   const { org, key: catalogId } = useParams();
+  const [queryParams] = useSearchParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
@@ -43,9 +44,9 @@ const LearningPathDetailPage = () => {
     return () => clearTimeout(id);
   }, []);
 
-  const { data: learningPaths } = useLearningPaths();
+  const { data: learningPaths, isLoading: loadingLearningPaths } = useLearningPaths();
 
-  const key = learningPaths.find((lp) => lp.slug === catalogId).id;
+  const key = learningPaths?.find((lp) => lp.slug === catalogId).id;
 
   const {
     data: detail,
@@ -123,6 +124,13 @@ const LearningPathDetailPage = () => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    const openEnrollModal = queryParams.get('open');
+    if (openEnrollModal === 'true') {
+      setIsModalOpen(true);
+    }
+  }, [queryParams]);
+
   // TODO: Retrieve this from the backend.
   const { data: organizations = {} } = useOrganizations();
 
@@ -153,7 +161,7 @@ const LearningPathDetailPage = () => {
   }
 
   let content;
-  if (loadingDetail || loadingCourses) {
+  if (loadingDetail || loadingCourses || loadingLearningPaths) {
     content = (
       <div className="d-flex justify-content-center align-items-center vh-100">
         <Spinner animation="border" variant="primary" />
