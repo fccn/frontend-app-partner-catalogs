@@ -15,6 +15,7 @@ import {
 } from '@openedx/paragon/icons';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
+  useLearningPaths,
 } from './data/queries';
 import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
@@ -24,7 +25,7 @@ import { buildCourseAboutUrl } from './utils';
 
 const LearningPathDetailPage = () => {
   const { isMedium, isLarge } = useScreenSize();
-  const { org, key } = useParams();
+  const { org, key: catalogId } = useParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
@@ -41,6 +42,10 @@ const LearningPathDetailPage = () => {
     const id = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 10);
     return () => clearTimeout(id);
   }, []);
+
+  const { data: learningPaths } = useLearningPaths();
+
+  const key = learningPaths.find((lp) => lp.slug === catalogId).id;
 
   const {
     data: detail,
