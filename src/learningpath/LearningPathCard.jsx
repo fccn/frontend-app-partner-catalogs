@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { getConfig } from '@edx/frontend-platform/config';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import {
@@ -55,6 +56,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     maxDate,
     partner,
     isManager,
+    slug: learningPathSlug,
   } = learningPath;
 
   const learningPathStatus = status?.toLowerCase();
@@ -130,8 +132,12 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   }), [partner]);
 
   const learningPathUrl = partnerSlug
-    ? `/catalog/${partnerSlug}/${id}`
-    : `/catalog/${id}`;
+    ? `/catalog/${partnerSlug}/${learningPathSlug}`
+    : `/catalog/${learningPathSlug}`;
+
+  const corporateManagerUrl = getConfig().CORPORATE_MANAGER_MFE_BASE_URL
+    ? `${getConfig().CORPORATE_MANAGER_MFE_BASE_URL}/${partnerSlug}/catalogs/${learningPathSlug}/courses/`
+    : '#';
 
   return (
     <Card
@@ -195,39 +201,42 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
           </div>
 
           {/* Right section (actions) */}
-          <div
-            className={`d-flex ${
+
+          <Stack
+            gap={3}
+            className={`justify-content-center align-items-end ${
               isSmall ? 'mt-3' : 'ml-auto'
-            } flex-column justify-content-center align-items-end`}
+            }`}
           >
             {isManager && (
-              <Link to={`/catalog/${id}`}>
+              <Link to={corporateManagerUrl} target="_blank">
                 <Button
                   variant="dark"
-                  className="w-100"
-                  style={{ minWidth: '180px' }}
+                  className="long-button light-icon"
                   size="sm"
                 >
-                  Manage
-                  <Icon src={Settings} />
+                  <Stack direction="horizontal" gap={2} className="align-items-center">
+                    Manage
+                    <Icon src={Settings} />
+                  </Stack>
                 </Button>
               </Link>
             )}
-            <Stack gap={3}>
-              {statusActions[statusVariant].map((s) => (
-                <Link to={learningPathUrl}>
-                  <Button
-                    variant="outline-dark"
-                    className="long-button w-100"
-                    size="sm"
-                  >
+            {statusActions[statusVariant].map((s) => (
+              <Link to={learningPathUrl}>
+                <Button
+                  variant="outline-dark"
+                  className="long-button dark-icon"
+                  size="sm"
+                >
+                  <Stack direction="horizontal" gap={2} className="align-items-center">
                     {cardButtons[s].buttonText}
                     <Icon src={cardButtons[s].buttonIcon} className="pl-1" />
-                  </Button>
-                </Link>
-              ))}
-            </Stack>
-          </div>
+                  </Stack>
+                </Button>
+              </Link>
+            ))}
+          </Stack>
         </div>
       </Card.Body>
     </Card>
@@ -253,6 +262,7 @@ LearningPathCard.propTypes = {
       logo: PropTypes.string,
     }).isRequired,
     isManager: PropTypes.bool,
+    slug: PropTypes.string,
   }).isRequired,
   showFilters: PropTypes.bool,
 };

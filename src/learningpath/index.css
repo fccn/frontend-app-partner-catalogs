@@ -708,8 +708,8 @@
     } 
 
     .long-button {
-      min-width: 180px;
-      padding: 0.25rem 2.5rem;
+      min-width: 250px;
+      padding: auto 2.5rem;
       border-radius: 4px;
     }
 
