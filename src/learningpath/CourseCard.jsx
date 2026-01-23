@@ -9,7 +9,9 @@ import {
   HowToReg,
   Calendar,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
@@ -20,6 +22,7 @@ import { useScreenSize } from '../hooks/useScreenSize';
 export const CourseCard = ({
   course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride, isEnrolledInCourse = false,
 }) => {
+  const { formatMessage } = useIntl();
   const {
     name,
     org,
@@ -50,24 +53,24 @@ export const CourseCard = ({
 
   const linkTo = buildCourseHomeUrl(course.id);
 
-  let buttonText = 'Start Course';
+  let buttonText = formatMessage(messages.startCourse);
 
   switch (status?.toLowerCase()) {
     case 'completed':
-      buttonText = 'View Certificate';
+      buttonText = formatMessage(messages.viewCertificate);
       break;
     case 'not started':
-      buttonText = 'Start Course';
+      buttonText = formatMessage(messages.startCourse);
       break;
     case 'in progress':
-      buttonText = 'Continue';
+      buttonText = formatMessage(messages.continueText);
       break;
     default:
       break;
   }
 
   if (checkingEnrollment) {
-    buttonText = 'Loading...';
+    buttonText = formatMessage(messages.loadingText);
   }
 
   const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
@@ -105,7 +108,7 @@ export const CourseCard = ({
               size="md"
               className="text-blue-600 flex-none"
             />
-            <span className="text-sm">10 Enrolled</span>
+            <span className="text-sm">{formatMessage(messages.enrolledCount, { count: 10 })}</span>
           </div>
 
           {/* Duration */}
@@ -118,7 +121,7 @@ export const CourseCard = ({
               size="md"
               className="text-blue-600 flex-none"
             />
-            <span className="text-sm">20 Hours</span>
+            <span className="text-sm">{formatMessage(messages.hoursText, { hours: 20 })}</span>
           </div>
 
           {/* Start Date */}
@@ -131,7 +134,7 @@ export const CourseCard = ({
               size="md"
               className="text-blue-600 flex-none"
             />
-            <span className="text-sm">Starts {dateDisplay}</span>
+            <span className="text-sm">{formatMessage(messages.startsOn, { date: dateDisplay })}</span>
           </div>
         </div>
       </Card.Section>
@@ -147,7 +150,7 @@ export const CourseCard = ({
             className="flex-fill py-2"
             onClick={onClickViewButton}
           >
-            More Details
+            {formatMessage(messages.moreDetails)}
           </Button>
 
           {!disableStartButton && (

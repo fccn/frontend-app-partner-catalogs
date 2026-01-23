@@ -7,14 +7,17 @@ import {
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
 import { FilterAlt, FilterList, Search } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { useLearningPaths, useLearnerDashboard, useOrganizations } from './data/queries';
 import LearningPathCard from './LearningPathCard';
 import FilterPanel from './FilterPanel';
 import { useScreenSize } from '../hooks/useScreenSize';
 import noResultsSVG from '../assets/no_results.svg';
+import messages from './message';
 
 const Dashboard = () => {
   const { isSmall } = useScreenSize();
+  const { formatMessage } = useIntl();
 
   const {
     data: learningPaths,
@@ -274,16 +277,23 @@ const Dashboard = () => {
     <>
       {emailConfirmation?.isNeeded && (
         <Alert className="account-activation m-0 p-2 rounded-0 text-center">
-          Activate your account! Check your inbox for an account activation link from {getConfig().SITE_NAME}.
-          If you need help, <Link to={`${getConfig().LMS_BASE_URL}/contact`} target="_blank" rel="noopener noreferrer">contact us</Link>.
+          {formatMessage(messages.activateAccountAlert, { siteName: getConfig().SITE_NAME })}{' '}
+          <span>
+            {formatMessage(messages.activateAccountHelp)}{' '}
+            <Link to={`${getConfig().LMS_BASE_URL}/contact`} target="_blank" rel="noopener noreferrer">{formatMessage(messages.contactUs)}</Link>
+          </span>
         </Alert>
       )}
       {!emailConfirmation?.isNeeded && enterpriseDashboard?.isLearnerPortalEnabled && (
         <Alert className="enterprise-dashboard m-0 p-2 rounded-0 text-center">
-          You have access to the <b>{enterpriseDashboard.label}</b> dashboard. To access the courses available to you through {enterpriseDashboard.label}, visit the{' '}
+          {formatMessage(messages.enterpriseDashboardAccess, {
+            label: enterpriseDashboard.label,
+            linkText: formatMessage(messages.enterpriseDashboardLinkText, { label: enterpriseDashboard.label }),
+          })}
+          {' '}
           <Link to={`${enterpriseDashboard.url}?utm_source=lms_dashboard_banner`}>
-            {enterpriseDashboard.label} dashboard
-          </Link>.
+            {formatMessage(messages.enterpriseDashboardLinkText, { label: enterpriseDashboard.label })}
+          </Link>
         </Alert>
       )}
       <div className="dashboard m-4.5">
@@ -310,7 +320,7 @@ const Dashboard = () => {
               </div>
             )}
             <div className={`dashboard-content ${showFilters ? 'shifted' : ''} ${showFilters && isSmall ? 'd-none' : ''}`}>
-              <h2>My Catalogs</h2>
+              <h2>{formatMessage(messages.myCatalogs)}</h2>
 
               <div className="d-flex align-items-center">
                 {!isSmall ? (
@@ -319,7 +329,7 @@ const Dashboard = () => {
                     onChange={setSearchQuery}
                     onSubmit={() => {}}
                     value={searchQuery}
-                    placeholder="Search"
+                    placeholder={formatMessage(messages.searchPlaceholder)}
                   />
                 ) : (
                   <div>
@@ -327,7 +337,7 @@ const Dashboard = () => {
                       src={Search}
                       iconAs={Icon}
                       variant="secondary"
-                      alt="Search"
+                      alt={formatMessage(messages.searchAlt)}
                       onClick={handleMobileSearchClick}
                     />
                     <div className="d-inline-block">
@@ -335,7 +345,7 @@ const Dashboard = () => {
                         src={FilterList}
                         iconAs={Icon}
                         variant="secondary"
-                        alt="Filter"
+                        alt={formatMessage(messages.filterButton)}
                         onClick={() => setShowFilters(true)}
                       />
                       {activeFiltersCount > 0 && (
@@ -353,7 +363,7 @@ const Dashboard = () => {
                     variant="outline-primary"
                     className="filter-button"
                   >
-                    <Icon src={FilterAlt} /> Filter
+                    <Icon src={FilterAlt} /> {formatMessage(messages.filterButton)}
                   </Button>
                 )}
 
@@ -367,21 +377,21 @@ const Dashboard = () => {
                     onSubmit={() => {}}
                     onBlur={handleMobileSearchBlur}
                     value={searchQuery}
-                    placeholder="Search"
+                    placeholder={formatMessage(messages.searchPlaceholder)}
                   />
                 </div>
               )}
 
               <div className="small text-muted">
-                Showing <b>{showingCount}</b> of <b>{totalCount}</b>
+                {formatMessage(messages.showing, { showing: showingCount, total: totalCount })}
               </div>
 
               {sortedItems.length === 0 ? (
                 <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
-                  <Image src={noResultsSVG} alt="No results" className="mb-4" />
+                  <Image src={noResultsSVG} alt={formatMessage(messages.noResultsAlt)} className="mb-4" />
                   <div>
-                    <div className="h3 my-2">No matching results</div>
-                    <div className="text-muted">Try another search or clear your filters</div>
+                    <div className="h3 my-2">{formatMessage(messages.noMatchingResults)}</div>
+                    <div className="text-muted">{formatMessage(messages.tryAnotherSearch)}</div>
                   </div>
                 </div>
               ) : (
