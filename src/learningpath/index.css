@@ -709,7 +709,8 @@
 
     .long-button {
       min-width: 250px;
-      padding: auto 2.5rem;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
       border-radius: 4px;
     }
 
@@ -724,6 +725,16 @@
       padding-right: 1.5rem;
       justify-content: center;
       text-transform: capitalize;
+    }
+
+    .chip-manager {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      background-color: var(--dark-gray);
+
+      & .pgn__chip__label {
+        color: white;
+      }
     }
   }
 }
