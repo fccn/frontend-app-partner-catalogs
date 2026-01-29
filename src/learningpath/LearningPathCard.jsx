@@ -215,7 +215,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             {isManager && (
               <Link to={corporateManagerUrl} target="_blank">
                 <Button
-                  variant="dark"
+                  variant="primary"
                   className="long-button light-icon"
                   size="sm"
                 >
