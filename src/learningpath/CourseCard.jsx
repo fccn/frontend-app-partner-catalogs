@@ -100,39 +100,36 @@ export const CourseCard = ({
         <div className="space-y-3">
           {/* Enrolled Count */}
           <div
-            className="text-gray-600"
-            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            className="text-gray-600 d-flex align-items-center"
           >
             <Icon
               src={HowToReg}
               size="md"
-              className="text-blue-600 flex-none"
+              className="text-blue-600 flex-none mr-2"
             />
             <span className="text-sm">{formatMessage(messages.enrolledCount, { count: 10 })}</span>
           </div>
 
           {/* Duration */}
           <div
-            className="text-gray-600"
-            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            className="text-gray-600 d-flex align-items-center"
           >
             <Icon
               src={AccessTime}
               size="md"
-              className="text-blue-600 flex-none"
+              className="text-blue-600 flex-none mr-2"
             />
             <span className="text-sm">{formatMessage(messages.hoursText, { hours: 20 })}</span>
           </div>
 
           {/* Start Date */}
           <div
-            className="text-gray-600"
-            style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
+            className="text-gray-600 d-flex align-items-center"
           >
             <Icon
               src={Calendar}
               size="md"
-              className="text-blue-600 flex-none"
+              className="text-blue-600 flex-none mr-2"
             />
             <span className="text-sm">{formatMessage(messages.startsOn, { date: dateDisplay })}</span>
           </div>
@@ -140,14 +137,11 @@ export const CourseCard = ({
       </Card.Section>
 
       <Card.Footer>
-        <div
-          className="d-flex flex-column flex-lg-row w-100"
-          style={{ gap: '12px' }}
-        >
+        <div className="d-flex flex-column flex-lg-row w-100">
           <Button
-            variant="outline-dark"
+            variant="outline-primary"
             size="sm"
-            className="flex-fill py-2"
+            className="flex-fill py-2 mr-2"
             onClick={onClickViewButton}
           >
             {formatMessage(messages.moreDetails)}
@@ -155,7 +149,7 @@ export const CourseCard = ({
 
           {!disableStartButton && (
           <Button
-            variant="dark"
+            variant="primary"
             size="sm"
             className="flex-fill py-2"
             onClick={onClick}

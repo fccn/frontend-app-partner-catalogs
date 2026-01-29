@@ -53,8 +53,8 @@ export default function DataSharingAuthorizationModal({
         </Stack>
       </ModalDialog.Body>
 
-      <ModalDialog.Footer style={{ gap: '12px' }}>
-        <Button variant="tertiary" onClick={onClose}>
+      <ModalDialog.Footer>
+        <Button className='mr-2' variant="tertiary" onClick={onClose}>
           {formatMessage(messages.dataSharingDoNotShare)}
         </Button>
         <Button variant="primary" onClick={onAllow}>
