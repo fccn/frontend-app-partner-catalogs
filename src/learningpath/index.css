@@ -638,6 +638,26 @@
     }
   }
 
+  .filter-panel-button {
+	position: absolute;
+	top: 2.3rem;
+	z-index: 1000;
+	width: 36px;
+	height: 36px;
+
+	&.mobile {
+      right: 1rem;
+      background-color: transparent;
+      color: black;
+    }
+  
+    &.desktop {
+      right: -18px;
+  	  background-color: var(--icon-blue);
+  	  color: white;
+    }
+  }
+
   .filter-actions {
     gap: 2rem;
 

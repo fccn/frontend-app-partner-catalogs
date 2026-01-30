@@ -35,21 +35,12 @@ const FilterPanel = ({
         </Button>
         )}
         <IconButton
-          src={isSmall ? Close : FilterList}
+          src={Close}
           iconAs={Icon}
           onClick={onClose}
-          className="position-absolute"
+          className={`filter-panel-button filter-panel-button ${isSmall ? 'mobile' : 'desktop'}`}
           alt={formatMessage(messages.closeFilterAlt)}
           isActive
-          style={{
-            top: '2.3rem',
-            right: isSmall ? '1rem' : '-18px',
-            zIndex: 1000,
-            width: '36px',
-            height: '36px',
-            backgroundColor: isSmall ? 'transparent' : 'var(--icon-blue)',
-            color: isSmall ? 'black' : 'white',
-          }}
         />
       </div>
 
