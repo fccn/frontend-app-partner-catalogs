@@ -14,6 +14,7 @@ import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
+  useCourseEnrollments,
 } from './data/queries';
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
@@ -23,8 +24,8 @@ export const CourseCard = ({
   onClick,
   onClickViewButton,
   isEnrolledInLearningPath,
-  showFilters = false,
   orientationOverride,
+  showFilters = false,
 }) => {
   const { formatMessage } = useIntl();
   const {
@@ -109,10 +110,11 @@ export const CourseCard = ({
               size="md"
               className="text-blue-600 flex-none mr-2"
             />
-            <span className="text-sm">{formatMessage(messages.enrolledCount, { count: 10 })}</span>
+            <span className="text-sm">{formatMessage(messages.enrolledCount, { count: course.enrollmentsQuantity ?? 0 })}</span>
           </div>
 
           {/* Duration */}
+          {!!course.duration && (
           <div
             className="text-gray-600 d-flex align-items-center"
           >
@@ -121,8 +123,9 @@ export const CourseCard = ({
               size="md"
               className="text-blue-600 flex-none mr-2"
             />
-            <span className="text-sm">{formatMessage(messages.hoursText, { hours: 20 })}</span>
+            <span className="text-sm">{formatMessage(messages.hoursText, { hours: course.duration })}</span>
           </div>
+          )}
 
           {/* Start Date */}
           <div
@@ -176,6 +179,8 @@ CourseCard.propTypes = {
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
     checkingEnrollment: PropTypes.bool,
+    enrollmentsQuantity: PropTypes.number.isRequired,
+    duration: PropTypes.string,
   }).isRequired,
   onClick: PropTypes.func,
   onClickViewButton: PropTypes.func,
@@ -188,11 +193,13 @@ export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
   const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
+  const { data: enrollments } = useCourseEnrollments(course.id);
   const [enrolling, setEnrolling] = useState(false);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
 
   const courseWithEnrollment = {
     ...course,
+    enrollmentsQuantity: enrollments?.count ?? 0,
     isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
     checkingEnrollment: checkingEnrollment || enrolling,
   };

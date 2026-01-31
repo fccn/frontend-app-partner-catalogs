@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   COURSE_COMPLETIONS: ['courseCompletions'],
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
+  COURSE_ENROLLMENTS: (courseId) => ['courseEnrollments', courseId],
   ORGANIZATIONS: ['organizations'],
 };
 
@@ -306,6 +307,14 @@ export const usePrefetchCourseDetail = (courseId) => {
 export const useCourseEnrollmentStatus = (courseId) => useQuery({
   queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId),
   queryFn: () => api.fetchCourseEnrollmentStatus(courseId),
+  enabled: !!courseId,
+  staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
+  refetchOnWindowFocus: false,
+});
+
+export const useCourseEnrollments = (courseId) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_ENROLLMENTS(courseId),
+  queryFn: () => api.fetchCourseEnrollments(courseId),
   enabled: !!courseId,
   staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
   refetchOnWindowFocus: false,

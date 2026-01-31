@@ -164,6 +164,25 @@ export async function fetchCourseEnrollmentStatus(courseId) {
   }
 }
 
+export async function fetchCourseEnrollments(courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const url = new URL(`${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollments`);
+    url.searchParams.append('course_id', courseId);
+    const response = await client.get(url.toString());
+    return {
+      count: response.data.results.length,
+      data: camelCaseObject(response.data.results),
+    };
+  } catch (error) {
+    // Handle API errors - they indicate the user is not enrolled.
+    return {
+      isEnrolled: false,
+      error,
+    };
+  }
+}
+
 export async function fetchOrganizations() {
   const client = getAuthenticatedHttpClient();
 
