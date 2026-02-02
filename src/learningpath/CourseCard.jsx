@@ -99,22 +99,21 @@ export const CourseCard = ({
 
       <Card.Header title={name} subtitle={orgData.name} size="md" />
 
-      <Card.Section>
-        <div className="space-y-3">
-          {/* Enrolled Count */}
-          <div
-            className="text-gray-600 d-flex align-items-center"
-          >
-            <Icon
-              src={HowToReg}
-              size="md"
-              className="text-blue-600 flex-none mr-2"
-            />
-            <span className="text-sm">{formatMessage(messages.enrolledCount, { count: course.enrollmentsQuantity ?? 0 })}</span>
-          </div>
+      <Card.Section className="space-y-3 flex-fill">
+        {/* Enrolled Count */}
+        <div
+          className="text-gray-600 d-flex align-items-center"
+        >
+          <Icon
+            src={HowToReg}
+            size="md"
+            className="text-blue-600 flex-none mr-2"
+          />
+          <span className="text-sm">{formatMessage(messages.enrolledCount, { count: course.enrollmentsQuantity ?? 0 })}</span>
+        </div>
 
-          {/* Duration */}
-          {!!course.duration && (
+        {/* Duration */}
+        {!!course.duration && (
           <div
             className="text-gray-600 d-flex align-items-center"
           >
@@ -125,19 +124,18 @@ export const CourseCard = ({
             />
             <span className="text-sm">{formatMessage(messages.hoursText, { hours: course.duration })}</span>
           </div>
-          )}
+        )}
 
-          {/* Start Date */}
-          <div
-            className="text-gray-600 d-flex align-items-center"
-          >
-            <Icon
-              src={Calendar}
-              size="md"
-              className="text-blue-600 flex-none mr-2"
-            />
-            <span className="text-sm">{formatMessage(messages.startsOn, { date: dateDisplay })}</span>
-          </div>
+        {/* Start Date */}
+        <div
+          className="text-gray-600 d-flex align-items-center"
+        >
+          <Icon
+            src={Calendar}
+            size="md"
+            className="text-blue-600 flex-none mr-2"
+          />
+          <span className="text-sm">{formatMessage(messages.startsOn, { date: dateDisplay })}</span>
         </div>
       </Card.Section>
 
