@@ -13,7 +13,7 @@ import {
   Check,
   AccessTimeFilled,
 } from '@openedx/paragon/icons';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl, FormattedDate } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
   useLearningPaths,
@@ -64,7 +64,6 @@ const LearningPathDetailPage = () => {
   }, [detail, activeTab]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const enrollMutation = useEnrollLearningPath();
 
   const handleDoNotShare = () => {
@@ -183,10 +182,9 @@ const LearningPathDetailPage = () => {
   } else {
     const {
       name,
-      image,
-      duration,
-      timeCommitment,
-      enrollmentDate,
+      partner: { logo: partnerLogo },
+      availableEndDate,
+      userLimit,
     } = detail;
 
     const detailSection = (
@@ -208,7 +206,7 @@ const LearningPathDetailPage = () => {
           className="w-100"
         >
           <Card.ImageCap
-            src={image}
+            src={partnerLogo}
             srcAlt={`${name} catalog image`}
             logoSrc={orgData?.logo}
             logoAlt={`${orgData?.name} logo`}
@@ -221,12 +219,9 @@ const LearningPathDetailPage = () => {
                 <h1 className="mb-2">
                   {name}
                 </h1>
-                <div
-                  className="text-muted mb-3"
-                  dangerouslySetInnerHTML={{
-                    __html: detail?.partner?.name || orgData?.name || '',
-                  }}
-                />
+                <p className="text-muted mb-3">
+                  {detail?.partner?.name || orgData?.name || ''}
+                </p>
                 <div className="d-flex align-items-center flex-wrap">
                   {statusAltText && (
                   <Chip
@@ -258,7 +253,6 @@ const LearningPathDetailPage = () => {
                 >
                   {(() => {
                     if (enrolling) { return formatMessage(messages.enrolling); }
-                    if (enrollmentDate) { return formatMessage(messages.enrolled); }
                     if (status === 'sent') { return formatMessage(messages.acceptInvitationText); }
                     return formatMessage(messages.selfEnrollment);
                   })()}
@@ -283,11 +277,7 @@ const LearningPathDetailPage = () => {
             <Icon src={AccessTimeFilled} className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">
-                {accessUntilDate.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+                <FormattedDate value={accessUntilDate} dateStyle="medium" />
               </p>
               <p className="mb-0">{formatMessage(messages.accessEnds)}</p>
             </div>
@@ -308,10 +298,12 @@ const LearningPathDetailPage = () => {
             <Icon src={Calendar} size="lg" className="mr-3 mt-1" />
             <div>
               <p className="mb-0 font-weight-bold">
-                {duration || formatMessage(messages.durationNotAvailable)}
+                {availableEndDate
+                  ? <FormattedDate value={availableEndDate} dateStyle="medium" />
+                  : formatMessage(messages.noEndDate)}
               </p>
               <p className="mb-0">
-                {timeCommitment || formatMessage(messages.durationLabel)}
+                {formatMessage(messages.enrollmentEndDate)}
               </p>
             </div>
           </Col>
@@ -319,9 +311,9 @@ const LearningPathDetailPage = () => {
           <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
             <Icon src={Person} size="lg" className="mr-3 mt-1" />
             <div>
-              <p className="mb-0 font-weight-bold">{formatMessage(messages.selfPaced)}</p>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.users, { count: userLimit })}</p>
               <p className="mb-0">
-                {formatMessage(messages.progressAtYourOwnSpeed)}
+                {formatMessage(messages.maxEnrolledUsers)}
               </p>
             </div>
           </Col>
@@ -345,7 +337,6 @@ const LearningPathDetailPage = () => {
                       courses={coursesForPath}
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
-                      enrollmentDateInLearningPath={enrollmentDate}
                       onCourseClick={handleCourseViewButton}
                     />
                   )}
