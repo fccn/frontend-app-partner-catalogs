@@ -182,7 +182,7 @@ const LearningPathDetailPage = () => {
   } else {
     const {
       name,
-      partner: { logo: partnerLogo },
+      image,
       availableEndDate,
       userLimit,
     } = detail;
@@ -206,7 +206,7 @@ const LearningPathDetailPage = () => {
           className="w-100"
         >
           <Card.ImageCap
-            src={partnerLogo}
+            src={image}
             srcAlt={`${name} catalog image`}
             logoSrc={orgData?.logo}
             logoAlt={`${orgData?.name} logo`}

@@ -712,6 +712,7 @@
 
 .pgn__card-logo-cap {
   padding: 0 !important;
+  object-fit: cover !important;
 }
 
 .dashboard {

@@ -63,7 +63,7 @@ const messages = defineMessages({
   noDescription: { id: 'learningpath.course.no_description', defaultMessage: 'No description available.' },
   earnCertificate: { id: 'learningpath.course.earn_certificate', defaultMessage: 'Earn a certificate' },
   approxDuration: { id: 'learningpath.course.approx_duration', defaultMessage: 'Approx. duration' },
-  maxEnrolledUsers: { id: 'learningpath.course.max_enrolled_users', defaultMessage: 'User enrollment limit' },
+  maxEnrolledUsers: { id: 'learningpath.course.max_enrolled_users', defaultMessage: 'Enrollment limit' },
   users: { id: 'learningpath.course.users', defaultMessage: '{count} users' },
   instructorPaced: { id: 'learningpath.course.instructor_paced', defaultMessage: 'Instructor-paced' },
   progressAtYourOwnSpeed: { id: 'learningpath.course.progress_at_your_own_speed', defaultMessage: 'Progress at your own speed' },
