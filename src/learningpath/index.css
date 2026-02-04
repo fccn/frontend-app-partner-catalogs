@@ -693,6 +693,7 @@
 
 .courses-counter {
   padding: 2px 6px 2px 2px;
+  background-color: transparent !important;
   
   .pgn__icon {
     color: var(--pgn-color-gray-500) !important;
