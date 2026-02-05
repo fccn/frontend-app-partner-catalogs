@@ -43,7 +43,6 @@
   }
 
   .pgn__spinner {
-    color: var(--crimson) !important;
     /* Move the spinner to the center of the screen. */
     margin-bottom: 200px;
   }
@@ -145,6 +144,7 @@
       .pgn__card-image-cap {
         /* The default (`auto`) value does not work in Safari. */
         width: 240px !important;
+		object-fit: contain;
       }
 
       .pgn__card-logo-cap {
@@ -158,10 +158,6 @@
 
     &.course-card .pgn__card-body {
       border-bottom: 5px solid #8C8179;
-    }
-
-    &.lp-card .pgn__card-body {
-        border-bottom: 5px solid var(--crimson);
     }
 
     .pgn__card-wrapper-image-cap {
@@ -620,7 +616,7 @@
   }
 
   .filter-clear-link {
-    color: var(--m-teal);
+    color: var(--pgn-color-action-default-info-500);
     border: none;
     font-size: small;
   }
@@ -653,7 +649,6 @@
   
     &.desktop {
       right: -18px;
-  	  background-color: var(--icon-blue);
   	  color: white;
     }
   }

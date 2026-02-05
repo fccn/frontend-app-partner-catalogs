@@ -193,7 +193,7 @@ const LearningPathDetailPage = () => {
     } = detail;
 
     const detailSection = (
-      <div className="hero px-4 px-md-6 py-4 bg-gray-100">
+      <div className="hero px-4 px-md-6 py-4 bg-light-200">
         <div className="mb-4">
           <Link
             to="/"
@@ -217,7 +217,7 @@ const LearningPathDetailPage = () => {
             logoAlt={`${orgData?.name} logo`}
           />
 
-          <Card.Body className="px-4 px-md-5 py-2 bg-gray-100">
+          <Card.Body className="px-4 px-md-5 py-2 bg-light-200">
             <Stack direction={isLarge ? 'vertical' : 'horizontal'} gap={4} className="justify-content-between">
 
               <Card.Section className="pt-1 pb-2">
