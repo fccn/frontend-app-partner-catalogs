@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
-  Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
+  Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
   Stack,
 } from '@openedx/paragon';
 import {
@@ -65,6 +65,8 @@ const LearningPathDetailPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const enrollMutation = useEnrollLearningPath();
+
   const handleDoNotShare = () => {
     setIsModalOpen(false);
   };
@@ -93,8 +95,6 @@ const LearningPathDetailPage = () => {
     isLoading: loadingCourses,
     error: coursesError,
   } = useCoursesByIds(courseIds);
-
-  const enrollMutation = useEnrollLearningPath();
 
   const accessUntilDate = useMemo(() => {
     if (!coursesForPath) {
@@ -184,11 +184,8 @@ const LearningPathDetailPage = () => {
     const {
       name,
       image,
-      subtitle,
       duration,
       timeCommitment,
-      requiredSkills,
-      description,
       enrollmentDate,
     } = detail;
 

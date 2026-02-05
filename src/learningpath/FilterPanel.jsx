@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Button, ButtonGroup, Form, Icon, IconButton,
 } from '@openedx/paragon';
-import { FilterList, Close } from '@openedx/paragon/icons';
+import { Close } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import messages from './message';
 
