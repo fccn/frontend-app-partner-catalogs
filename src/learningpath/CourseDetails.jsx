@@ -56,6 +56,16 @@ const CourseDetailContent = ({
 
   const { isSmall } = useScreenSize();
   const navigate = useNavigate();
+  const paceText = selfPaced
+    ? formatMessage(messages.selfPaced)
+    : formatMessage(messages.instructorPaced);
+  const aboutHtml = replaceStaticAssetReferences(
+    description || shortDescription || formatMessage(messages.noDescription),
+    course.id,
+  );
+  const scheduleText = selfPaced
+    ? formatMessage(messages.progressAtYourOwnSpeed)
+    : formatMessage(messages.followCourseSchedule);
   const handleClose = onClose || (() => navigate(-1));
   const { courseKey: urlCourseKey } = useParams();
   const activeCourseKey = course.id || urlCourseKey;
@@ -148,10 +158,8 @@ const CourseDetailContent = ({
           <div className="d-flex align-items-center">
             <Icon src={Person} className="mr-4 mb-3.5" />
             <div>
-              <p className="mb-0 font-weight-bold">{selfPaced ? formatMessage(messages.selfPaced) : formatMessage(messages.instructorPaced)}</p>
-              <p className="mb-0 text-muted">
-                {selfPaced ? formatMessage(messages.progressAtYourOwnSpeed) : formatMessage(messages.followCourseSchedule)}
-              </p>
+              <p className="mb-0 font-weight-bold">{paceText}</p>
+              <p className="mb-0 text-muted">{scheduleText}</p>
             </div>
           </div>
         </Row>
@@ -172,10 +180,7 @@ const CourseDetailContent = ({
       <div className="py-3">
         <section id="about">
           {/* eslint-disable-next-line react/no-danger */}
-          <div dangerouslySetInnerHTML={{
-            __html: replaceStaticAssetReferences(description || shortDescription || formatMessage(messages.noDescription), course.id),
-          }}
-          />
+          <div dangerouslySetInnerHTML={{ __html: aboutHtml }} />
         </section>
       </div>
     </>
@@ -205,6 +210,7 @@ const CourseDetailPage = ({
   courseKey: propCourseKey,
   learningPathTitle,
 }) => {
+  const { formatMessage } = useIntl();
   const { courseKey: urlCourseKey } = useParams();
   const courseKey = propCourseKey || urlCourseKey;
 

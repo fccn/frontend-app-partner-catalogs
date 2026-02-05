@@ -47,9 +47,6 @@ export const useLearningPaths = () => {
         queryFn: api.fetchAllCourseCompletions,
       });
 
-      const completions = queryClient.getQueryData(QUERY_KEYS.COURSE_COMPLETIONS) || {};
-      const completionsMap = createCompletionsMap(completions);
-
       const learningPathList = await api.fetchLearningPaths();
 
       return learningPathList.map(lp => {
@@ -78,8 +75,8 @@ export const useLearningPaths = () => {
           percent = Math.round(progress * 100);
         }
 
-        let minDate = null;
-        let maxDate = null;
+        const minDate = null;
+        const maxDate = null;
 
         return {
           ...lp,

@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  ModalDialog, Button, Alert, Stack,
+  ModalDialog, Button, Stack,
 } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import messages from './message';
 
-export default function DataSharingAuthorizationModal({
+const DataSharingAuthorizationModal = ({
   isOpen,
   onClose,
   onAllow,
   partnerName = 'Corporate Partner Name',
   additionalMessage,
-}) {
+}) => {
   const { formatMessage } = useIntl();
   return (
     <ModalDialog
@@ -54,7 +54,7 @@ export default function DataSharingAuthorizationModal({
       </ModalDialog.Body>
 
       <ModalDialog.Footer>
-        <Button className='mr-2' variant="tertiary" onClick={onClose}>
+        <Button className="mr-2" variant="tertiary" onClick={onClose}>
           {formatMessage(messages.dataSharingDoNotShare)}
         </Button>
         <Button variant="primary" onClick={onAllow}>
@@ -63,7 +63,9 @@ export default function DataSharingAuthorizationModal({
       </ModalDialog.Footer>
     </ModalDialog>
   );
-}
+};
+
+export default DataSharingAuthorizationModal;
 
 DataSharingAuthorizationModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,

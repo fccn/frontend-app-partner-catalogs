@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 import {
-  Card, Button, Col, ProgressBar, Chip, PageBanner, Icon,
+  Card, Button, Icon,
 } from '@openedx/paragon';
 import {
   AccessTime,
@@ -20,7 +19,12 @@ import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 export const CourseCard = ({
-  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride, isEnrolledInCourse = false,
+  course,
+  onClick,
+  onClickViewButton,
+  isEnrolledInLearningPath,
+  showFilters = false,
+  orientationOverride,
 }) => {
   const { formatMessage } = useIntl();
   const {
@@ -50,8 +54,6 @@ export const CourseCard = ({
   const handleMouseEnter = () => {
     prefetchCourseDetail();
   };
-
-  const linkTo = buildCourseHomeUrl(course.id);
 
   let buttonText = formatMessage(messages.startCourse);
 
@@ -175,10 +177,6 @@ CourseCard.propTypes = {
     percent: PropTypes.number.isRequired,
     checkingEnrollment: PropTypes.bool,
   }).isRequired,
-  relatedLearningPaths: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    key: PropTypes.string.isRequired,
-  })),
   onClick: PropTypes.func,
   onClickViewButton: PropTypes.func,
   isEnrolledInLearningPath: PropTypes.bool,
