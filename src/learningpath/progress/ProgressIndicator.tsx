@@ -18,7 +18,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ status }) => {
           color: '#52854C',
           altText: 'progressCompleted',
         };
-      case 'in progress':
+      case 'accepted':
         return {
           icon: Timelapse,
           color: 'var(--m-teal)',
