@@ -349,6 +349,19 @@ export const useEnrollLearningPath = () => {
   });
 };
 
+export const useDeclineInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.declineInvitation,
+    onSuccess: (_, learningPathId) => {
+      queryClient.invalidateQueries(
+        QUERY_KEYS.LEARNING_PATH_DETAIL(learningPathId),
+      );
+    },
+  });
+};
+
 export const useEnrollCourse = (learningPathId) => {
   const queryClient = useQueryClient();
 

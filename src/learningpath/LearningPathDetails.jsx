@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import {
+  useParams, Link, useSearchParams, useNavigate,
+} from 'react-router-dom';
 import {
   Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
   Stack,
@@ -17,6 +19,7 @@ import { useIntl, FormattedDate } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
   useLearningPaths,
+  useDeclineInvitation,
 } from './data/queries';
 import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
@@ -30,6 +33,7 @@ const LearningPathDetailPage = () => {
   const { formatMessage } = useIntl();
   const { isMedium, isLarge } = useScreenSize();
   const { org, key: catalogId } = useParams();
+  const navigate = useNavigate();
   const [queryParams] = useSearchParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
@@ -67,9 +71,23 @@ const LearningPathDetailPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const enrollMutation = useEnrollLearningPath();
   const { showToast } = useToast();
+  const declineInvitationMutation = useDeclineInvitation();
 
-  const handleDoNotShare = () => {
-    setIsModalOpen(false);
+  const handleDoNotShare = (decline = false) => {
+    if (decline) {
+      declineInvitationMutation.mutate(key, {
+        onSuccess: () => {
+          setIsModalOpen(false);
+          navigate('/');
+        },
+        onError: ({ response }) => {
+          showToast(response.data.detail);
+        },
+
+      });
+    } else {
+      setIsModalOpen(false);
+    }
   };
 
   const handleAllowAndContinue = () => {
@@ -86,7 +104,6 @@ const LearningPathDetailPage = () => {
           showToast(response.data.detail);
           setEnrolling(false);
         },
-
       });
     }
   };
