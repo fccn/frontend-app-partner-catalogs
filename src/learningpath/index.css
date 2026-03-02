@@ -664,6 +664,15 @@
   }
 }
 
+.course-with-progress {
+  height: 100%;
+  
+  .course-card-wrapper {
+	display: flex;
+    height: 100%;
+  }
+}
+
 .courses-with-progress-list {
   .course-with-progress {
     margin-bottom: 2rem;
@@ -679,6 +688,7 @@
 
     .course-card-wrapper {
       flex: 1;
+	  height: 100%;
       margin-left: 1rem;
       min-height: 100px;
     }
@@ -702,6 +712,7 @@
 
 .pgn__card-logo-cap {
   padding: 0 !important;
+  object-fit: cover !important;
 }
 
 .dashboard {
