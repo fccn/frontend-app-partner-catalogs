@@ -5,6 +5,8 @@ import {
 import {
   Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
   Stack,
+  AlertModal,
+  ActionRow,
 } from '@openedx/paragon';
 import {
   Person,
@@ -69,22 +71,30 @@ const LearningPathDetailPage = () => {
   }, [detail, activeTab]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenConfirmationModal, setIsOpenConfirmationModal] = useState(false);
+
   const enrollMutation = useEnrollLearningPath();
   const { showToast } = useToast();
   const declineInvitationMutation = useDeclineInvitation();
 
+  const handleCloseConfirmationModal = () => setIsOpenConfirmationModal(false);
+
+  const handleDeclineInvitation = () => {
+    declineInvitationMutation.mutate(key, {
+      onSuccess: () => {
+        setIsModalOpen(false);
+        navigate('/');
+      },
+      onError: ({ response }) => {
+        showToast(response.data.detail);
+      },
+
+    });
+  };
+
   const handleDoNotShare = (decline = false) => {
     if (decline) {
-      declineInvitationMutation.mutate(key, {
-        onSuccess: () => {
-          setIsModalOpen(false);
-          navigate('/');
-        },
-        onError: ({ response }) => {
-          showToast(response.data.detail);
-        },
-
-      });
+      setIsOpenConfirmationModal(true);
     } else {
       setIsModalOpen(false);
     }
@@ -402,6 +412,24 @@ const LearningPathDetailPage = () => {
 
   return (
     <>
+      <AlertModal
+        title={formatMessage(messages.headsUp)}
+        isOpen={isOpenConfirmationModal}
+        onClose={handleCloseConfirmationModal}
+        footerNode={(
+          <ActionRow>
+            <Button variant="tertiary" onClick={handleCloseConfirmationModal}>
+              {formatMessage(messages.cancel)}
+            </Button>
+            <Button variant="danger" onClick={handleDeclineInvitation}>{formatMessage(messages.confirm)}</Button>
+          </ActionRow>
+        )}
+      >
+        <p>
+          {formatMessage(messages.declineConfirmationMessage)}
+        </p>
+      </AlertModal>
+
       {content}
 
       {selectedCourseKey && (

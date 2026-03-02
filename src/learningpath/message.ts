@@ -82,6 +82,10 @@ const messages = defineMessages({
   dataSharingConfirm: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Do you authorize sharing your data for this course with {partnerName}?' },
   dataSharingDoNotShare: { id: 'learningpath.data_sharing.do_not_share', defaultMessage: 'Do Not Share' },
   dataSharingAllowAndContinue: { id: 'learningpath.data_sharing.allow_and_continue', defaultMessage: 'Allow and Continue' },
+  cancel: { id: 'learningpath.data_sharing.cancel', defaultMessage: 'Cancel' },
+  confirm: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Confirm' },
+  headsUp: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Heads Up!' },
+  declineConfirmationMessage: { id: 'learningpath.data_sharing.declineConfirmationMessage', defaultMessage: 'Declining this invitation cannot be undone. An administrator will need to resend it if you wish to accept later' },
   // Additional messages used across learningpath components
   activateAccountAlert: { id: 'learningpath.dashboard.activate_account', defaultMessage: 'Activate your account! Check your inbox for an account activation link from {siteName}.' },
   activateAccountHelp: { id: 'learningpath.dashboard.activate_account_help', defaultMessage: 'If you need help, {contactLink}.' },
