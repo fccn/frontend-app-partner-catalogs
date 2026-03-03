@@ -34,7 +34,7 @@ subscribe(APP_READY, () => {
               element={<Dashboard />}
             />
             <Route
-              path="/catalog/:org/:key/*"
+              path="/:org/catalog/:key/*"
               element={<LearningPathDetailPage />}
             />
             <Route

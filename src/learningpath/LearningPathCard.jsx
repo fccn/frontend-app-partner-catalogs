@@ -136,8 +136,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   }), [partner]);
 
   const learningPathUrl = partnerSlug
-    ? `/catalog/${partnerSlug}/${learningPathSlug}`
-    : `/catalog/${learningPathSlug}`;
+    ? `/${partnerSlug}/catalog/${learningPathSlug}`
+    : `${learningPathSlug}/catalog`;
 
   const corporateManagerUrl = getConfig().CORPORATE_MANAGER_MFE_BASE_URL
     ? `${getConfig().CORPORATE_MANAGER_MFE_BASE_URL}/${partnerSlug}/catalogs/${learningPathSlug}/courses/`
