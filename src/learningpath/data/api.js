@@ -4,14 +4,15 @@ import { getConfig, camelCaseObject } from '@edx/frontend-platform';
 export async function fetchLearningPaths() {
   const client = getAuthenticatedHttpClient();
   // FIXME: This API has pagination.
-  const response = await client.get(`${getConfig().LMS_BASE_URL}/api/learning_paths/v1/learning-paths/`);
+  const response = await client.get(`${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/`);
   const data = response.data.results || response.data;
+
   return camelCaseObject(data);
 }
 
 export async function fetchLearningPathDetail(key) {
   const client = getAuthenticatedHttpClient();
-  const response = await client.get(`${getConfig().LMS_BASE_URL}/api/learning_paths/v1/learning-paths/${key}/`);
+  const response = await client.get(`${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${key}/`);
   return camelCaseObject(response.data);
 }
 
@@ -110,7 +111,7 @@ export async function enrollInLearningPath(learningPathId) {
   const client = getAuthenticatedHttpClient();
   try {
     const response = await client.post(
-      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/`,
+      `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/enroll/`,
     );
     return {
       success: true,
@@ -129,7 +130,7 @@ export async function enrollInCourse(learningPathId, courseId) {
   const client = getAuthenticatedHttpClient();
   try {
     const response = await client.post(
-      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/${courseId}/`,
+      `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/courses/${courseId}/enroll/`,
     );
     return {
       success: true,
