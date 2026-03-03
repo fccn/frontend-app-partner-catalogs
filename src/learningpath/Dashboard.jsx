@@ -6,6 +6,7 @@ import {
   Spinner, Col, Button, Pagination, Icon, IconButton, SearchField, Image, Bubble, Alert,
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
+import { logError } from '@edx/frontend-platform/logging';
 import { FilterAlt, FilterList, Search } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { useLearningPaths, useLearnerDashboard, useOrganizations } from './data/queries';
@@ -43,7 +44,7 @@ const Dashboard = () => {
   const error = pathsError || dashboardError;
 
   if (error) {
-    console.error('Error loading data:', error);
+    logError('Error loading data:', error);
   }
 
   const items = useMemo(() => {

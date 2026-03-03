@@ -76,16 +76,13 @@ export const useLearningPaths = () => {
           percent = Math.round(progress * 100);
         }
 
-        const minDate = null;
-        const maxDate = null;
-
         return {
           ...lp,
           key: lp.id,
           displayName: lp.name,
           numCourses: totalCourses,
-          minDate,
-          maxDate,
+          minDate: null,
+          maxDate: null,
           percent,
           type: 'learning_path',
           org: lp.org,
