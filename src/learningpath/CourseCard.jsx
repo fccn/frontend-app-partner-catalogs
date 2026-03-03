@@ -1,25 +1,33 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 import {
-  Card, Button, Col, ProgressBar, Chip, PageBanner, Icon,
+  Card, Button, Icon,
 } from '@openedx/paragon';
 import {
   AccessTime,
   HowToReg,
   Calendar,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
+  useCourseEnrollments,
 } from './data/queries';
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 export const CourseCard = ({
-  course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false, orientationOverride, isEnrolledInCourse = false,
+  course,
+  onClick,
+  onClickViewButton,
+  isEnrolledInLearningPath,
+  orientationOverride,
+  showFilters = false,
 }) => {
+  const { formatMessage } = useIntl();
   const {
     name,
     org,
@@ -37,13 +45,10 @@ export const CourseCard = ({
     })
     : null;
 
-
   const { isSmall, isMedium } = useScreenSize();
-  const orientation = orientationOverride
-    ? orientationOverride
-    : (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
-      ? 'vertical'
-      : 'horizontal';
+  const orientation = orientationOverride || ((showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
+    ? 'vertical'
+    : 'horizontal');
 
   // Prefetch the course detail when the user hovers over the card.
   const prefetchCourseDetail = usePrefetchCourseDetail(course.id);
@@ -51,26 +56,24 @@ export const CourseCard = ({
     prefetchCourseDetail();
   };
 
-  const linkTo = buildCourseHomeUrl(course.id);
-
-  let buttonText = 'Start Course';
+  let buttonText = formatMessage(messages.startCourse);
 
   switch (status?.toLowerCase()) {
     case 'completed':
-      buttonText = 'View Certificate';
+      buttonText = formatMessage(messages.viewCertificate);
       break;
     case 'not started':
-      buttonText = 'Start Course';
+      buttonText = formatMessage(messages.startCourse);
       break;
     case 'in progress':
-      buttonText = 'Continue';
+      buttonText = formatMessage(messages.continueText);
       break;
     default:
       break;
   }
 
   if (checkingEnrollment) {
-    buttonText = 'Loading...';
+    buttonText = formatMessage(messages.loadingText);
   }
 
   const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
@@ -82,92 +85,84 @@ export const CourseCard = ({
   }), [organizations, org]);
 
   return (
-    <>
-      <Card
-        orientation={orientation}
-        className={`h-full hover:shadow-lg transition-shadow ${orientation} mb-4`}
-        onMouseEnter={handleMouseEnter}
-      >
-        <Card.ImageCap
-          src={buildAssetUrl(courseImageAssetPath)}
-          srcAlt={`${name} course image`}
-          logoSrc={orgData.logo}
-          logoAlt={`${orgData.name} logo`}
-        />
+    <Card
+      orientation={orientation}
+      className={`h-full hover:shadow-lg transition-shadow ${orientation} mb-4`}
+      onMouseEnter={handleMouseEnter}
+    >
+      <Card.ImageCap
+        src={buildAssetUrl(courseImageAssetPath)}
+        srcAlt={`${name} course image`}
+        logoSrc={orgData.logo}
+        logoAlt={`${orgData.name} logo`}
+      />
 
-        <Card.Header title={name} subtitle={orgData.name} size="md" />
+      <Card.Header title={name} subtitle={orgData.name} size="md" />
 
-        <Card.Section>
-          <div className="space-y-3">
-            {/* Enrolled Count */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={HowToReg}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">10 Enrolled</span>
-            </div>
+      <Card.Section className="space-y-3 flex-fill">
+        {/* Enrolled Count */}
+        <div
+          className="text-gray-600 d-flex align-items-center"
+        >
+          <Icon
+            src={HowToReg}
+            size="md"
+            className="text-blue-600 flex-none mr-2"
+          />
+          <span className="text-sm">{formatMessage(messages.enrolledCount, { count: course.enrollmentsQuantity ?? 0 })}</span>
+        </div>
 
-            {/* Duration */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={AccessTime}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">20 Hours</span>
-            </div>
-
-            {/* Start Date */}
-            <div
-              className="text-gray-600"
-              style={{ display: 'flex', alignItems: 'center', columnGap: '0.5rem' }}
-            >
-              <Icon
-                src={Calendar}
-                size={"md"}
-                className="text-blue-600 flex-none"
-              />
-              <span className="text-sm">Starts {dateDisplay}</span>
-            </div>
-          </div>
-        </Card.Section>
-
-        <Card.Footer>
+        {/* Duration */}
+        {!!course.duration && (
           <div
-            className="d-flex flex-column flex-lg-row w-100"
-            style={{ gap: '12px' }}
+            className="text-gray-600 d-flex align-items-center"
           >
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="flex-fill py-2"
-              onClick={onClickViewButton}
-            >
-              More Details
-            </Button>
-            
-            {!disableStartButton && (
-              <Button
-                variant="primary"
-                size="sm"
-                className="flex-fill py-2"
-                onClick={onClick}
-              >
-                { buttonText }
-              </Button>
-            )}
+            <Icon
+              src={AccessTime}
+              size="md"
+              className="text-blue-600 flex-none mr-2"
+            />
+            <span className="text-sm">{formatMessage(messages.hoursText, { hours: course.duration })}</span>
           </div>
-        </Card.Footer>
-      </Card>
-    </>
+        )}
+
+        {/* Start Date */}
+        <div
+          className="text-gray-600 d-flex align-items-center"
+        >
+          <Icon
+            src={Calendar}
+            size="md"
+            className="text-blue-600 flex-none mr-2"
+          />
+          <span className="text-sm">{formatMessage(messages.startsOn, { date: dateDisplay })}</span>
+        </div>
+      </Card.Section>
+
+      <Card.Footer>
+        <div className="d-flex flex-column flex-lg-row w-100">
+          <Button
+            variant="outline-primary"
+            size="sm"
+            className="flex-fill py-2 mr-2"
+            onClick={onClickViewButton}
+          >
+            {formatMessage(messages.moreDetails)}
+          </Button>
+
+          {!disableStartButton && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="flex-fill py-2"
+            onClick={onClick}
+          >
+            { buttonText }
+          </Button>
+          )}
+        </div>
+      </Card.Footer>
+    </Card>
   );
 };
 
@@ -182,11 +177,9 @@ CourseCard.propTypes = {
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
     checkingEnrollment: PropTypes.bool,
+    enrollmentsQuantity: PropTypes.number.isRequired,
+    duration: PropTypes.string,
   }).isRequired,
-  relatedLearningPaths: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    key: PropTypes.string.isRequired,
-  })),
   onClick: PropTypes.func,
   onClickViewButton: PropTypes.func,
   isEnrolledInLearningPath: PropTypes.bool,
@@ -198,11 +191,13 @@ export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
   const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
+  const { data: enrollments } = useCourseEnrollments(course.id);
   const [enrolling, setEnrolling] = useState(false);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
 
   const courseWithEnrollment = {
     ...course,
+    enrollmentsQuantity: enrollments?.count ?? 0,
     isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
     checkingEnrollment: checkingEnrollment || enrolling,
   };

@@ -1,70 +1,71 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalDialog, Button, Alert, Stack } from '@openedx/paragon';
+import {
+  ModalDialog, Button, Stack,
+} from '@openedx/paragon';
+import { useIntl } from '@edx/frontend-platform/i18n';
+import messages from './message';
 
-export default function DataSharingAuthorizationModal({
+const DataSharingAuthorizationModal = ({
   isOpen,
   onClose,
   onAllow,
   partnerName = 'Corporate Partner Name',
   additionalMessage,
-}) {
+}) => {
+  const { formatMessage } = useIntl();
   return (
-    <ModalDialog 
-        isOpen={isOpen}
-        onClose={onClose}
-        size="lg"
-        className='p-4 pt-5'
-        title="Data Sharing Authorization"
-        isOverflowVisible={false}
-        hasCloseButton
+    <ModalDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      className="p-4 pt-5"
+      title={formatMessage(messages.dataSharingTitle)}
+      isOverflowVisible={false}
+      hasCloseButton
     >
       <ModalDialog.Header>
-        <ModalDialog.Title>Data Sharing Authorization</ModalDialog.Title>
+        <ModalDialog.Title>{formatMessage(messages.dataSharingTitle)}</ModalDialog.Title>
       </ModalDialog.Header>
 
       <ModalDialog.Body>
         <Stack gap={3}>
           <div>
             <p className="mb-2">
-              To enroll in this course through the <strong>{partnerName}</strong> catalog, we need your permission
-              to share certain information about your activity in this course with <strong>{partnerName}</strong>.
-              This information will be used solely for tracking and reporting purposes within their training program.
+              {formatMessage(messages.dataSharingDescription, { partnerName })}
             </p>
 
             {additionalMessage ? (
-              <div className="border-top border-bottom border-light py-3 mt-3">
-                {additionalMessage}
-              </div>
+              <div className="border-top border-bottom border-light py-3 mt-3">{additionalMessage}</div>
             ) : null}
           </div>
 
           <div>
-            <p className="mb-2"><strong>By allowing data sharing, you confirm that:</strong></p>
+            <p className="mb-2"><strong>{formatMessage(messages.dataSharingByAllowing)}</strong></p>
             <ul className="mb-0">
-              <li>You have been invited or your email is eligible for this corporate catalog.</li>
-              <li>You understand that the shared information includes data such as your course progress, grades, and completion status.</li>
-              <li>You consent to <strong>{partnerName}</strong> receiving this information in accordance with applicable data protection laws (GDPR).</li>
+              <li>{formatMessage(messages.dataSharingLi1)}</li>
+              <li>{formatMessage(messages.dataSharingLi2)}</li>
+              <li>{formatMessage(messages.dataSharingLi3, { partnerName })}</li>
             </ul>
           </div>
 
-          <p className="mb-0">
-            <strong>Do you authorize sharing your data for this course with {partnerName}?</strong>
-          </p>
+          <p className="mb-0"><strong>{formatMessage(messages.dataSharingConfirm, { partnerName })}</strong></p>
         </Stack>
       </ModalDialog.Body>
 
-      <ModalDialog.Footer style={{ gap: '12px' }}>
-        <Button variant="tertiary" onClick={onClose}>
-          Do Not Share
+      <ModalDialog.Footer>
+        <Button className="mr-2" variant="tertiary" onClick={onClose}>
+          {formatMessage(messages.dataSharingDoNotShare)}
         </Button>
         <Button variant="primary" onClick={onAllow}>
-          Allow and Continue
+          {formatMessage(messages.dataSharingAllowAndContinue)}
         </Button>
       </ModalDialog.Footer>
     </ModalDialog>
   );
-}
+};
+
+export default DataSharingAuthorizationModal;
 
 DataSharingAuthorizationModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,

@@ -1,20 +1,55 @@
 import React, { useMemo } from 'react';
+import { getConfig } from '@edx/frontend-platform/config';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Card, Button, Chip, Icon } from '@openedx/paragon';
+import {
+  Card, Button, Chip, Icon,
+  Stack,
+} from '@openedx/paragon';
 import {
   BookOpen,
   AccessTime,
   Check,
   ArrowForward,
   Settings,
+  RemoveRedEye,
 } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { usePrefetchLearningPathDetail } from './data/queries';
+import messages from './message';
 import { useScreenSize } from '../hooks/useScreenSize';
 
+const statusActions = {
+  pending: ['pending'],
+  accepted: ['accepted'],
+  sent: ['sent', 'pending'],
+  upcoming: ['upcoming'],
+};
+
+const cardButtons = {
+  pending: {
+    buttonMessageKey: 'viewCatalogInfo',
+    buttonIcon: RemoveRedEye,
+  },
+  accepted: {
+    buttonMessageKey: 'goToCatalog',
+    buttonIcon: ArrowForward,
+  },
+  sent: {
+    buttonMessageKey: 'acceptInvitationBtn',
+    buttonIcon: Check,
+    query: '?open=true',
+  },
+  upcoming: {
+    buttonMessageKey: 'view',
+    buttonIcon: ArrowForward,
+  },
+};
+
 const LearningPathCard = ({ learningPath, showFilters = false }) => {
+  const { formatMessage } = useIntl();
   const {
-    key,
+    id,
     image,
     displayName,
     subtitle,
@@ -25,33 +60,29 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     maxDate,
     partner,
     isManager,
+    slug: learningPathSlug,
   } = learningPath;
 
+  const learningPathStatus = status?.toLowerCase();
   const { isSmall, isMedium } = useScreenSize();
-  const orientation =
-    (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
-      ? 'vertical'
-      : 'horizontal';
+  const orientation = (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall)
+    ? 'vertical'
+    : 'horizontal';
 
   const prefetchLearningPathDetail = usePrefetchLearningPathDetail();
-  const handleMouseEnter = () => prefetchLearningPathDetail(key);
+  const handleMouseEnter = () => prefetchLearningPathDetail(id);
 
   let statusVariant = 'pending';
-  let buttonText = 'View Catalog Info';
-  let buttonIcon = Check;
-  let statusAltText = 'Self Enrollment';
+  let statusAltText = formatMessage(messages.selfEnrollment);
 
-  switch (status?.toLowerCase()) {
+  switch (learningPathStatus) {
     case 'sent':
-      statusVariant = 'pending';
-      buttonText = 'View Catalog Info';
-      statusAltText = 'Pending Invitation';
+      statusVariant = 'sent';
+      statusAltText = formatMessage(messages.pendingInvitation);
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      buttonText = 'Go to the catalog';
-      buttonIcon = ArrowForward;
-      statusAltText = 'Active';
+      statusAltText = formatMessage(messages.activeStatus);
       break;
     default:
       break;
@@ -67,10 +98,10 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     });
     accessText = (
       <>
-        Access starts on <b>{d}</b>
+        {formatMessage(messages.accessStartsOnPrefix)} <b>{d}</b>
       </>
     );
-    buttonText = 'View';
+    statusVariant = 'upcoming';
   } else if (maxDate) {
     const d = maxDate.toLocaleDateString('en-US', {
       month: 'short',
@@ -80,24 +111,23 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     if (now > maxDate) {
       accessText = (
         <>
-          Access ended on <b>{d}</b>
+          {formatMessage(messages.accessEndedOnPrefix)} <b>{d}</b>
         </>
       );
-      buttonText = 'View';
-      if (status.toLowerCase() !== 'completed') statusVariant = '';
+      statusVariant = 'upcoming';
+      if (status.toLowerCase() !== 'completed') { statusVariant = ''; }
     } else {
       accessText = (
         <>
-          Access until <b>{d}</b>
+          {formatMessage(messages.accessUntilPrefix)} <b>{d}</b>
         </>
       );
     }
   }
 
-  const subtitleLine =
-    subtitle && duration
-      ? `${subtitle} • ${duration} days`
-      : subtitle || duration || '';
+  const subtitleLine = subtitle && duration
+    ? `${subtitle} • ${duration} days`
+    : subtitle || duration || '';
 
   const { partnerName, partnerLogo, partnerSlug } = useMemo(() => ({
     partnerName: partner?.name || partner?.slug || '',
@@ -106,8 +136,12 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
   }), [partner]);
 
   const learningPathUrl = partnerSlug
-    ? `/catalog/${partnerSlug}/${key}`
-    : `/catalog/${key}`;
+    ? `/${partnerSlug}/catalog/${learningPathSlug}`
+    : `${learningPathSlug}/catalog`;
+
+  const corporateManagerUrl = getConfig().CORPORATE_MANAGER_MFE_BASE_URL
+    ? `${getConfig().CORPORATE_MANAGER_MFE_BASE_URL}/${partnerSlug}/catalogs/${learningPathSlug}/courses/`
+    : '#';
 
   return (
     <Card
@@ -146,8 +180,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
             <div className="d-flex flex-wrap gap-2 mb-2">
               {isManager && (
-                <Chip>
-                  Manager
+                <Chip className="chip-manager">
+                  {formatMessage(messages.catalogManager)}
                 </Chip>
               )}
             </div>
@@ -158,8 +192,8 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
             <div className="d-flex flex-wrap gap-3 align-items-center">
               {numCourses !== undefined && numCourses !== null && (
-                <Chip iconBefore={BookOpen} className="border-0 p-0">
-                  {numCourses} courses
+                <Chip iconBefore={BookOpen} className="courses-counter border-0 p-0">
+                  {formatMessage(messages.coursesCount, { count: numCourses })}
                 </Chip>
               )}
               {accessText && (
@@ -171,36 +205,42 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
           </div>
 
           {/* Right section (actions) */}
-          <div
-            className={`d-flex ${
+
+          <Stack
+            gap={3}
+            className={`justify-content-center align-items-end ${
               isSmall ? 'mt-3' : 'ml-auto'
-            } flex-column justify-content-center align-items-end`}
+            }`}
           >
             {isManager && (
-              <Link to={`/catalog/${key}`}>
+              <Link to={corporateManagerUrl} target="_blank">
                 <Button
-                  variant="dark"
-                  className="w-100"
-                  style={{ minWidth: '180px' }}
+                  variant="primary"
+                  className="long-button light-icon"
                   size="sm"
                 >
-                  Manage
-                  <Icon src={Settings} />
+                  <Stack direction="horizontal" gap={2} className="align-items-center">
+                    {formatMessage(messages.manage)}
+                    <Icon src={Settings} />
+                  </Stack>
                 </Button>
               </Link>
             )}
-            <Link to={learningPathUrl}>
-              <Button
-                variant="outline-primary"
-                className="w-100"
-                style={{ minWidth: '180px' }}
-                size="sm"
-              >
-                {buttonText}
-                <Icon src={buttonIcon} className="pl-1" />
-              </Button>
-            </Link>
-          </div>
+            {statusActions[statusVariant].map((s) => (
+              <Link key={s} to={`${learningPathUrl}${cardButtons[s].query || ''}`}>
+                <Button
+                  variant="outline-dark"
+                  className="long-button dark-icon"
+                  size="sm"
+                >
+                  <Stack direction="horizontal" gap={2} className="align-items-center">
+                    {formatMessage(messages[cardButtons[s].buttonMessageKey])}
+                    <Icon src={cardButtons[s].buttonIcon} className="pl-1" />
+                  </Stack>
+                </Button>
+              </Link>
+            ))}
+          </Stack>
         </div>
       </Card.Body>
     </Card>
@@ -209,7 +249,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
 
 LearningPathCard.propTypes = {
   learningPath: PropTypes.shape({
-    key: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     image: PropTypes.string,
     displayName: PropTypes.string.isRequired,
     subtitle: PropTypes.string,
@@ -226,6 +266,7 @@ LearningPathCard.propTypes = {
       logo: PropTypes.string,
     }).isRequired,
     isManager: PropTypes.bool,
+    slug: PropTypes.string,
   }).isRequired,
   showFilters: PropTypes.bool,
 };

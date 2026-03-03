@@ -43,7 +43,6 @@
   }
 
   .pgn__spinner {
-    color: var(--crimson) !important;
     /* Move the spinner to the center of the screen. */
     margin-bottom: 200px;
   }
@@ -111,13 +110,6 @@
     }
 
     button {
-      margin-top: 1rem;
-      margin-bottom: 20px;
-
-      &.filter-button, &.filter-button:hover, &.filter-button:active, &.page-link.btn-primary {
-        background-color: var(--crimson) !important;
-      }
-
       &.page-link {
         border-radius: 0;
       }
@@ -152,6 +144,7 @@
       .pgn__card-image-cap {
         /* The default (`auto`) value does not work in Safari. */
         width: 240px !important;
+		object-fit: contain;
       }
 
       .pgn__card-logo-cap {
@@ -165,10 +158,6 @@
 
     &.course-card .pgn__card-body {
       border-bottom: 5px solid #8C8179;
-    }
-
-    &.lp-card .pgn__card-body {
-        border-bottom: 5px solid var(--crimson);
     }
 
     .pgn__card-wrapper-image-cap {
@@ -374,7 +363,7 @@
       font-weight: 400;
     }
 
-    &.status-pending {
+    &:is(.status-pending, .status-sent) {
       background-color: #FEBE46B2;
   
       .pgn__chip__label,
@@ -468,14 +457,14 @@
 
   .hero {
     .card {
-      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
       border-radius: 0;
       box-shadow: none;
 
       .pgn__card-wrapper-image-cap {
-        &.horizontal {
+         &.horizontal {
+          overflow: visible;
           flex: 0 0 auto;
-          height: 320px;
+          max-height: auto;
           min-width: 320px !important;
           max-width: unset !important;
 
@@ -484,12 +473,12 @@
 
             /* The default (`auto`) value does not work in Safari. */
             width: 100% !important;
+            max-width: 500px;
           }
 
           .pgn__card-logo-cap {
-            top: 1rem;
-            left: unset !important;
-            right: 1rem;
+            bottom: -0.5rem;
+            left: 1.5rem !important;
           }
         }
 
@@ -520,23 +509,19 @@
       }
     }
 
-    .hero-info {
-      justify-content: space-between;
-      align-items: center;
-      white-space: nowrap;
-      gap: 0.75rem;
+}
+  .hero-info {
+    justify-content: space-around;
+    align-items: center;
+    white-space: nowrap;
+    gap: 0.75rem;
 
-      .text-muted {
-        font-size: 0.8rem;
-      }
+    &.lp-hero-info svg {
+        color: var(--dark-gray);
+    }
 
-      &.lp-hero-info svg {
-        color: var(--crimson);
-      }
-
-      &.course-hero-info svg {
+    &.course-hero-info svg {
         color: #8C8179;
-      }
     }
   }
 
@@ -631,7 +616,7 @@
   }
 
   .filter-clear-link {
-    color: var(--m-teal);
+    color: var(--pgn-color-action-default-info-500);
     border: none;
     font-size: small;
   }
@@ -649,6 +634,25 @@
     }
   }
 
+  .filter-panel-button {
+	position: absolute;
+	top: 2.3rem;
+	z-index: 1000;
+	width: 36px;
+	height: 36px;
+
+	&.mobile {
+      right: 1rem;
+      background-color: transparent;
+      color: black;
+    }
+  
+    &.desktop {
+      right: -18px;
+  	  color: white;
+    }
+  }
+
   .filter-actions {
     gap: 2rem;
 
@@ -657,6 +661,15 @@
       border-radius: 0.25rem !important;
       border-color: var(--icon-blue);
     }
+  }
+}
+
+.course-with-progress {
+  height: 100%;
+  
+  .course-card-wrapper {
+	display: flex;
+    height: 100%;
   }
 }
 
@@ -675,8 +688,80 @@
 
     .course-card-wrapper {
       flex: 1;
+	  height: 100%;
       margin-left: 1rem;
       min-height: 100px;
+    }
+  }
+}
+
+
+.courses-counter {
+  padding: 2px 6px 2px 2px;
+  background-color: transparent !important;
+  
+  .pgn__icon {
+    color: var(--pgn-color-gray-500) !important;
+  }
+  
+  .pgn__chip__label {
+    color: var(--pgn-color-gray-500) !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+.pgn__card-logo-cap {
+  padding: 0 !important;
+  object-fit: cover !important;
+}
+
+.dashboard {
+  & .dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; 
+
+    .pgn__searchfield {
+      border: 1px solid #cecece;
+      border-radius: 8px;
+    }  
+
+    .dashboard-item {
+      max-width: 100%;
+    }  
+
+    & > div:first-of-type {
+      gap: 1rem;
+    } 
+
+    .long-button {
+      min-width: 250px;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+      border-radius: 4px;
+    }
+
+    .filter-button {
+      padding-right: 1.5rem;
+      padding-left: 1.5rem;
+      border-radius: 8px;
+    }  
+      
+    .status-chip {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      justify-content: center;
+      text-transform: capitalize;
+    }
+
+    .chip-manager {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      background-color: var(--dark-gray);
+
+      & .pgn__chip__label {
+        color: white;
+      }
     }
   }
 }

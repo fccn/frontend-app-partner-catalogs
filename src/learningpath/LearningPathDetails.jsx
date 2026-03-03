@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
-  Row, Spinner, Nav, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
+  Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
+  Stack,
 } from '@openedx/paragon';
 import {
   Person,
@@ -10,25 +11,30 @@ import {
   ChevronLeft,
   BookOpen,
   Check,
+  AccessTimeFilled,
 } from '@openedx/paragon/icons';
+import { useIntl, FormattedDate } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
+  useLearningPaths,
 } from './data/queries';
 import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
-import { buildCourseAboutUrl } from './utils';  
+import { buildCourseAboutUrl } from './utils';
+import messages from './message';
 
 const LearningPathDetailPage = () => {
-  const { isSmall } = useScreenSize();
-  const { org, key } = useParams();
+  const { formatMessage } = useIntl();
+  const { isMedium, isLarge } = useScreenSize();
+  const { org, key: catalogId } = useParams();
+  const [queryParams] = useSearchParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
   const [localStatus, setLocalStatus] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
-
 
   const handleCollapsibleToggle = (collapsibleId) => {
     setOpenCollapsible(openCollapsible === collapsibleId ? null : collapsibleId);
@@ -40,6 +46,10 @@ const LearningPathDetailPage = () => {
     const id = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 10);
     return () => clearTimeout(id);
   }, []);
+
+  const { data: learningPaths, isLoading: loadingLearningPaths } = useLearningPaths();
+
+  const key = learningPaths?.find((lp) => lp.slug === catalogId).id;
 
   const {
     data: detail,
@@ -54,6 +64,7 @@ const LearningPathDetailPage = () => {
   }, [detail, activeTab]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const enrollMutation = useEnrollLearningPath();
 
   const handleDoNotShare = () => {
     setIsModalOpen(false);
@@ -83,8 +94,6 @@ const LearningPathDetailPage = () => {
     isLoading: loadingCourses,
     error: coursesError,
   } = useCoursesByIds(courseIds);
-
-  const enrollMutation = useEnrollLearningPath();
 
   const accessUntilDate = useMemo(() => {
     if (!coursesForPath) {
@@ -117,6 +126,13 @@ const LearningPathDetailPage = () => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    const openEnrollModal = queryParams.get('open');
+    if (openEnrollModal === 'true') {
+      setIsModalOpen(true);
+    }
+  }, [queryParams]);
+
   // TODO: Retrieve this from the backend.
   const { data: organizations = {} } = useOrganizations();
 
@@ -130,24 +146,24 @@ const LearningPathDetailPage = () => {
 
   const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
   const isEnrolledInLearningPath = status === 'accepted';
-  let statusVariant = "pending";
-  let statusAltText = "Self Enrollment";
+  let statusVariant = 'pending';
+  let statusAltText = formatMessage(messages.selfEnrollment);
 
   switch (status) {
     case 'sent':
       statusVariant = 'pending';
-      statusAltText = "Pending Invitation";
+      statusAltText = formatMessage(messages.pendingInvitation);
       break;
     case 'accepted':
       statusVariant = 'accepted';
-      statusAltText = "Active";
+      statusAltText = formatMessage(messages.activeStatus);
       break;
     default:
       break;
   }
 
   let content;
-  if (loadingDetail || loadingCourses) {
+  if (loadingDetail || loadingCourses || loadingLearningPaths) {
     content = (
       <div className="d-flex justify-content-center align-items-center vh-100">
         <Spinner animation="border" variant="primary" />
@@ -156,10 +172,10 @@ const LearningPathDetailPage = () => {
   } else if (detailError || !detail) {
     content = (
       <div className="p-4">
-        <p>Failed to load detail</p>
+        <p>{formatMessage(messages.failedToLoadDetail)}</p>
         <Link to="/">
           <Icon src={ChevronLeft} />
-          <span>Back to My Catalogs</span>
+          <span>{formatMessage(messages.backToMyCatalogs)}</span>
         </Link>
       </div>
     );
@@ -167,31 +183,26 @@ const LearningPathDetailPage = () => {
     const {
       name,
       image,
-      subtitle,
-      duration,
-      timeCommitment,
-      requiredSkills,
-      description,
-      enrollmentDate,
+      availableEndDate,
+      userLimit,
     } = detail;
 
-  const detailSection = (
-    <div className="hero px-4 px-md-6 pt-4">
-      <div className="hero-inner mx-auto">
+    const detailSection = (
+      <div className="hero px-4 px-md-6 py-4 bg-light-200">
         <div className="mb-4">
           <Link
             to="/"
             className="d-flex align-items-center text-decoration-none"
           >
             <Icon src={ChevronLeft} className="mr-2" />
-            <span className="font-weight-bold">
-              Back to My Catalogs
+            <span>
+              {formatMessage(messages.backToMyCatalogs)}
             </span>
           </Link>
         </div>
 
         <Card
-          orientation={isSmall ? 'vertical' : 'horizontal'}
+          orientation={isMedium ? 'vertical' : 'horizontal'}
           className="w-100"
         >
           <Card.ImageCap
@@ -201,138 +212,131 @@ const LearningPathDetailPage = () => {
             logoAlt={`${orgData?.name} logo`}
           />
 
-          <Card.Body className="px-4 px-md-5 py-4 py-md-5">
-            <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center">
-              <div className="flex-grow-1 mr-lg-4">
-                <Card.Section className="pt-1 pb-2">
-                  <h1 className="mb-2">
-                    {name}
-                  </h1>
-                  <div
-                    className="text-muted mb-3"
-                    dangerouslySetInnerHTML={{
-                      __html: detail?.partner?.name || orgData?.name || '',
-                    }}
-                  />
-                  <div className="d-flex align-items-center flex-wrap">
-                    {statusAltText && (
-                      <Chip
-                        className={`status-chip status-${statusVariant} mr-2 mb-2 px-4`}
-                      >
-                        {statusAltText}
-                      </Chip>
-                    )}
+          <Card.Body className="px-4 px-md-5 py-2 bg-light-200">
+            <Stack direction={isLarge ? 'vertical' : 'horizontal'} gap={4} className="justify-content-between">
 
-                    {detail?.courses != null && (
-                      <Chip
-                        iconBefore={BookOpen}
-                        variant="light"
-                        className="border-0 mb-2"
-                      >
-                        {detail.courses} courses
-                      </Chip>
-                    )}
-                  </div>
-                </Card.Section>
-              </div>
+              <Card.Section className="pt-1 pb-2">
+                <h1 className="mb-2">
+                  {name}
+                </h1>
+                <p className="text-muted mb-3">
+                  {detail?.partner?.name || orgData?.name || ''}
+                </p>
+                <div className="d-flex align-items-center flex-wrap">
+                  {statusAltText && (
+                  <Chip
+                    className={`status-chip status-${statusVariant} mr-2 mb-2 px-4`}
+                  >
+                    {statusAltText}
+                  </Chip>
+                  )}
+
+                  {detail?.courses != null && (
+                  <Chip
+                    iconBefore={BookOpen}
+                    variant="light"
+                    className="courses-counter border-0 mb-2 bg-gray-100"
+                  >
+                    {formatMessage(messages.coursesCount, { count: detail.courses })}
+                  </Chip>
+                  )}
+                </div>
+              </Card.Section>
 
               {status !== 'accepted' && (
-                <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
-                  <Button
-                    size="md"
-                    className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
-                    onClick={handleEnrollClick}
-                    disabled={enrolling}
-                  >
-                    {(() => {
-                        if (enrolling) return 'Enrolling...';
-                        if (enrollmentDate) return 'Enrolled';
-                        if (status === 'sent') return 'Accept the invitation';
-                        return "Self Enrollment"
-                      })()}
-                    <Icon src={Check} className="ml-2" />
-                  </Button>
-                </div>
+              <div className="mt-3 mt-lg-0 d-flex w-100 w-lg-auto justify-content-stretch justify-content-lg-end">
+                <Button
+                  size="md"
+                  className="w-100 w-lg-auto text-nowrap d-flex align-items-center justify-content-center"
+                  onClick={handleEnrollClick}
+                  disabled={enrolling}
+                >
+                  {(() => {
+                    if (enrolling) { return formatMessage(messages.enrolling); }
+                    if (status === 'sent') { return formatMessage(messages.acceptInvitationText); }
+                    return formatMessage(messages.selfEnrollment);
+                  })()}
+                  <Icon src={Check} className="ml-2" />
+                </Button>
+              </div>
               )}
-            </div>
+            </Stack>
+
           </Card.Body>
         </Card>
-
-        <Row className="my-4 mx-0 hero-info lp-hero-info gy-3">
-          {accessUntilDate && (
-            <Col xs={12} sm={6} md="auto" className="d-flex">
-              <Icon src={AccessTimeFilled} className="mr-3 mt-1" />
-              <div>
-                <p className="mb-0 font-weight-bold">
-                  {accessUntilDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </p>
-                <p className="mb-0 text-muted">Access ends</p>
-              </div>
-            </Col>
-          )}
-
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Award} className="mr-3 mt-1" />
-            <div>
-              <p className="mb-0 font-weight-bold">Certificate</p>
-              <p className="mb-0 text-muted">
-                Courses include certification
-              </p>
-            </div>
-          </Col>
-
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Calendar} className="mr-3 mt-1" />
-            <div>
-              <p className="mb-0 font-weight-bold">
-                {duration || 'Duration not available'}
-              </p>
-              <p className="mb-0 text-muted">
-                {timeCommitment || 'Duration'}
-              </p>
-            </div>
-          </Col>
-
-          <Col xs={12} sm={6} md="auto" className="d-flex">
-            <Icon src={Person} className="mr-3 mt-1" />
-            <div>
-              <p className="mb-0 font-weight-bold">Self-paced</p>
-              <p className="mb-0 text-muted">
-                Progress at your own speed
-              </p>
-            </div>
-          </Col>
-        </Row>
       </div>
-    </div>
-  );
+    );
 
     content = (
       <div className="detail-page learning-path-detail-page">
         {detailSection}
+
+        <Row className="py-5 mx-0 hero-info lp-hero-info gy-3 border-bottom border-gray-100 bg-white">
+          {accessUntilDate && (
+          <Col xs={12} sm={6} md="auto" className="d-flex">
+            <Icon src={AccessTimeFilled} className="mr-3 mt-1" />
+            <div>
+              <p className="mb-0 font-weight-bold">
+                <FormattedDate value={accessUntilDate} dateStyle="medium" />
+              </p>
+              <p className="mb-0">{formatMessage(messages.accessEnds)}</p>
+            </div>
+          </Col>
+          )}
+
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Award} size="lg" className="mr-3 mt-1" />
+            <div>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.certificate)}</p>
+              <p className="mb-0">
+                {formatMessage(messages.coursesIncludeCertification)}
+              </p>
+            </div>
+          </Col>
+
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Calendar} size="lg" className="mr-3 mt-1" />
+            <div>
+              <p className="mb-0 font-weight-bold">
+                {availableEndDate
+                  ? <FormattedDate value={availableEndDate} dateStyle="medium" />
+                  : formatMessage(messages.noEndDate)}
+              </p>
+              <p className="mb-0">
+                {formatMessage(messages.enrollmentEndDate)}
+              </p>
+            </div>
+          </Col>
+
+          <Col xs={12} sm={6} md="auto" className="d-flex align-items-center">
+            <Icon src={Person} size="lg" className="mr-3 mt-1" />
+            <div>
+              <p className="mb-0 font-weight-bold">{formatMessage(messages.users, { count: userLimit })}</p>
+              <p className="mb-0">
+                {formatMessage(messages.maxEnrolledUsers)}
+              </p>
+            </div>
+          </Col>
+        </Row>
+
         <div className="py-3 lp-info">
-          {isSmall ? (
+          {isMedium ? (
             <div className="mobile-content px-3">
               <Collapsible
-                title="Courses"
+                title={formatMessage(messages.coursesTitle)}
                 open={openCollapsible === 'courses'}
                 onToggle={() => handleCollapsibleToggle('courses')}
                 className="mb-2"
               >
                 <section id="courses">
                   {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>No sub-courses found in this learning path.</p>
+                    <p>{formatMessage(messages.noSubCourses)}</p>
                   )}
                   {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
                     <CoursesWithProgressList
                       courses={coursesForPath}
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
-                      enrollmentDateInLearningPath={enrollmentDate}
                       onCourseClick={handleCourseViewButton}
                     />
                   )}
@@ -344,7 +348,7 @@ const LearningPathDetailPage = () => {
               <div id="courses-section-wrapper">
                 <section id="courses">
                   {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>No sub-courses found in this learning path.</p>
+                    <p>{formatMessage(messages.noSubCourses)}</p>
                   )}
                   {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
                     <CoursesWithProgressList

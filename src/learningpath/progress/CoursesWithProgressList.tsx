@@ -15,10 +15,8 @@ const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
   learningPathId,
   isEnrolledInLearningPath = false,
   onCourseClick,
-}) => {
-
-  return (
-    <Container fluid className="py-4 learning-path-courses-grid w-100 px-0">
+}) => (
+  <Container fluid className="py-4 learning-path-courses-grid w-100 px-0">
     <Row className="g-12">
       {courses.map((course) => (
         <Col key={course.id} xs={12} sm={6} md={6} lg={6} xl={4}>
@@ -32,7 +30,6 @@ const CoursesWithProgressList: React.FC<CoursesWithProgressListProps> = ({
       ))}
     </Row>
   </Container>
-  );
-};
+);
 
 export default CoursesWithProgressList;

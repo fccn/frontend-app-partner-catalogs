@@ -6,15 +6,19 @@ import {
   Spinner, Col, Button, Pagination, Icon, IconButton, SearchField, Image, Bubble, Alert,
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
+import { logError } from '@edx/frontend-platform/logging';
 import { FilterAlt, FilterList, Search } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { useLearningPaths, useLearnerDashboard, useOrganizations } from './data/queries';
 import LearningPathCard from './LearningPathCard';
 import FilterPanel from './FilterPanel';
 import { useScreenSize } from '../hooks/useScreenSize';
 import noResultsSVG from '../assets/no_results.svg';
+import messages from './message';
 
 const Dashboard = () => {
   const { isSmall } = useScreenSize();
+  const { formatMessage } = useIntl();
 
   const {
     data: learningPaths,
@@ -40,7 +44,7 @@ const Dashboard = () => {
   const error = pathsError || dashboardError;
 
   if (error) {
-    console.error('Error loading data:', error);
+    logError('Error loading data:', error);
   }
 
   const items = useMemo(() => {
@@ -195,18 +199,15 @@ const Dashboard = () => {
     () => items.filter(item => {
       const effectiveStatus = getEffectiveStatus(item);
 
-      const statusMatch =
-        selectedStatuses.length === 0
+      const statusMatch = selectedStatuses.length === 0
         || (effectiveStatus && selectedStatuses.includes(effectiveStatus));
 
       const dateStatus = getDateStatus(item);
-      const dateStatusMatch =
-        selectedDateStatuses.length === 0
+      const dateStatusMatch = selectedDateStatuses.length === 0
         || selectedDateStatuses.includes(dateStatus);
 
       const orgSlug = item.partner?.slug;
-      const orgMatch =
-        selectedOrgs.length === 0
+      const orgMatch = selectedOrgs.length === 0
         || (orgSlug && selectedOrgs.includes(orgSlug));
 
       const searchMatch = searchQuery === ''
@@ -220,9 +221,9 @@ const Dashboard = () => {
 
   const sortedItems = useMemo(() => {
     const statusOrder = {
-      'sent': 1,
-      'accepted': 2,
-      'completed': 3,
+      sent: 1,
+      accepted: 2,
+      completed: 3,
       'self enrollment': 4,
     };
     const dateStatusOrder = { Upcoming: 1, Open: 2, Ended: 3 };
@@ -277,16 +278,23 @@ const Dashboard = () => {
     <>
       {emailConfirmation?.isNeeded && (
         <Alert className="account-activation m-0 p-2 rounded-0 text-center">
-          Activate your account! Check your inbox for an account activation link from {getConfig().SITE_NAME}.
-          If you need help, <Link to={`${getConfig().LMS_BASE_URL}/contact`} target="_blank" rel="noopener noreferrer">contact us</Link>.
+          {formatMessage(messages.activateAccountAlert, { siteName: getConfig().SITE_NAME })}{' '}
+          <span>
+            {formatMessage(messages.activateAccountHelp)}{' '}
+            <Link to={`${getConfig().LMS_BASE_URL}/contact`} target="_blank" rel="noopener noreferrer">{formatMessage(messages.contactUs)}</Link>
+          </span>
         </Alert>
       )}
       {!emailConfirmation?.isNeeded && enterpriseDashboard?.isLearnerPortalEnabled && (
         <Alert className="enterprise-dashboard m-0 p-2 rounded-0 text-center">
-          You have access to the <b>{enterpriseDashboard.label}</b> dashboard. To access the courses available to you through {enterpriseDashboard.label}, visit the{' '}
+          {formatMessage(messages.enterpriseDashboardAccess, {
+            label: enterpriseDashboard.label,
+            linkText: formatMessage(messages.enterpriseDashboardLinkText, { label: enterpriseDashboard.label }),
+          })}
+          {' '}
           <Link to={`${enterpriseDashboard.url}?utm_source=lms_dashboard_banner`}>
-            {enterpriseDashboard.label} dashboard
-          </Link>.
+            {formatMessage(messages.enterpriseDashboardLinkText, { label: enterpriseDashboard.label })}
+          </Link>
         </Alert>
       )}
       <div className="dashboard m-4.5">
@@ -313,41 +321,53 @@ const Dashboard = () => {
               </div>
             )}
             <div className={`dashboard-content ${showFilters ? 'shifted' : ''} ${showFilters && isSmall ? 'd-none' : ''}`}>
-              <div className="dashboard-header d-flex justify-content-between align-items-center">
-                <h2>My Catalogs</h2>
+              <h2>{formatMessage(messages.myCatalogs)}</h2>
+
+              <div className="d-flex align-items-center">
                 {!isSmall ? (
                   <SearchField
                     onClear={() => setSearchQuery('')}
                     onChange={setSearchQuery}
                     onSubmit={() => {}}
                     value={searchQuery}
-                    placeholder="Search"
+                    placeholder={formatMessage(messages.searchPlaceholder)}
                   />
                 ) : (
                   <div>
                     <IconButton
                       src={Search}
                       iconAs={Icon}
-                      variant="black"
-                      alt="Search"
+                      variant="secondary"
+                      alt={formatMessage(messages.searchAlt)}
                       onClick={handleMobileSearchClick}
                     />
                     <div className="d-inline-block">
                       <IconButton
                         src={FilterList}
                         iconAs={Icon}
-                        variant="black"
-                        alt="Filter"
+                        variant="secondary"
+                        alt={formatMessage(messages.filterButton)}
                         onClick={() => setShowFilters(true)}
                       />
                       {activeFiltersCount > 0 && (
-                        <Bubble className="position-absolute mt-4 ml-n3.5">
-                          {activeFiltersCount}
-                        </Bubble>
+                      <Bubble className="position-absolute mt-4 ml-n3.5">
+                        {activeFiltersCount}
+                      </Bubble>
                       )}
                     </div>
                   </div>
                 )}
+
+                {!showFilters && !isSmall && (
+                  <Button
+                    onClick={() => setShowFilters(true)}
+                    variant="outline-primary"
+                    className="filter-button"
+                  >
+                    <Icon src={FilterAlt} /> {formatMessage(messages.filterButton)}
+                  </Button>
+                )}
+
               </div>
 
               {isSmall && showMobileSearch && (
@@ -358,34 +378,21 @@ const Dashboard = () => {
                     onSubmit={() => {}}
                     onBlur={handleMobileSearchBlur}
                     value={searchQuery}
-                    placeholder="Search"
+                    placeholder={formatMessage(messages.searchPlaceholder)}
                   />
                 </div>
               )}
 
-              <div className="d-flex justify-content-between align-items-center">
-                {!showFilters && !isSmall && (
-                  <Button
-                    onClick={() => setShowFilters(true)}
-                    variant="secondary"
-                    className="filter-button border-0"
-                  >
-                    <Icon src={FilterAlt} /> Filter
-                  </Button>
-                )}
-                <div className="small text-muted">
-                  Showing <b>{showingCount}</b> of <b>{totalCount}</b>
-                </div>
+              <div className="small text-muted">
+                {formatMessage(messages.showing, { showing: showingCount, total: totalCount })}
               </div>
-
-              <hr className={`mt-0 mb-4 ${showFilters || isSmall ? 'invisible' : 'visible'}`} />
 
               {sortedItems.length === 0 ? (
                 <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
-                  <Image src={noResultsSVG} alt="No results" className="mb-4" />
+                  <Image src={noResultsSVG} alt={formatMessage(messages.noResultsAlt)} className="mb-4" />
                   <div>
-                    <div className="h3 my-2">No matching results</div>
-                    <div className="text-muted">Try another search or clear your filters</div>
+                    <div className="h3 my-2">{formatMessage(messages.noMatchingResults)}</div>
+                    <div className="text-muted">{formatMessage(messages.tryAnotherSearch)}</div>
                   </div>
                 </div>
               ) : (

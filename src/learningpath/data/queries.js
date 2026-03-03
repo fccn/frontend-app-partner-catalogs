@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   COURSE_COMPLETIONS: ['courseCompletions'],
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
+  COURSE_ENROLLMENTS: (courseId) => ['courseEnrollments', courseId],
   ORGANIZATIONS: ['organizations'],
 };
 
@@ -47,9 +48,6 @@ export const useLearningPaths = () => {
         queryFn: api.fetchAllCourseCompletions,
       });
 
-      const completions = queryClient.getQueryData(QUERY_KEYS.COURSE_COMPLETIONS) || {};
-      const completionsMap = createCompletionsMap(completions);
-
       const learningPathList = await api.fetchLearningPaths();
 
       return learningPathList.map(lp => {
@@ -78,16 +76,13 @@ export const useLearningPaths = () => {
           percent = Math.round(progress * 100);
         }
 
-        let minDate = null;
-        let maxDate = null;
-
         return {
           ...lp,
           key: lp.id,
           displayName: lp.name,
           numCourses: totalCourses,
-          minDate,
-          maxDate,
+          minDate: null,
+          maxDate: null,
           percent,
           type: 'learning_path',
           org: lp.org,
@@ -309,6 +304,14 @@ export const usePrefetchCourseDetail = (courseId) => {
 export const useCourseEnrollmentStatus = (courseId) => useQuery({
   queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId),
   queryFn: () => api.fetchCourseEnrollmentStatus(courseId),
+  enabled: !!courseId,
+  staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
+  refetchOnWindowFocus: false,
+});
+
+export const useCourseEnrollments = (courseId) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_ENROLLMENTS(courseId),
+  queryFn: () => api.fetchCourseEnrollments(courseId),
   enabled: !!courseId,
   staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
   refetchOnWindowFocus: false,
