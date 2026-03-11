@@ -17,6 +17,7 @@ import queryClient from './queryClient';
 import Dashboard from './learningpath/Dashboard';
 import LearningPathDetailPage from './learningpath/LearningPathDetails';
 import CourseDetailPage from './learningpath/CourseDetails';
+import { ToastProvider } from './hooks/useToast';
 
 import './index.scss';
 import './setupConsoleOverride';
@@ -26,24 +27,26 @@ subscribe(APP_READY, () => {
   root.render(
     <AppProvider store={null}>
       <QueryClientProvider client={queryClient}>
-        <Header />
-        <main id="main-content">
-          <Routes>
-            <Route
-              path="/"
-              element={<Dashboard />}
-            />
-            <Route
-              path="/:org/catalog/:key/*"
-              element={<LearningPathDetailPage />}
-            />
-            <Route
-              path="/course/:courseKey"
-              element={<CourseDetailPage />}
-            />
-          </Routes>
-        </main>
-        <FooterSlot />
+        <ToastProvider>
+          <Header />
+          <main id="main-content">
+            <Routes>
+              <Route
+                path="/"
+                element={<Dashboard />}
+              />
+              <Route
+                path="/:org/catalog/:key/*"
+                element={<LearningPathDetailPage />}
+              />
+              <Route
+                path="/course/:courseKey"
+                element={<CourseDetailPage />}
+              />
+            </Routes>
+          </main>
+          <FooterSlot />
+        </ToastProvider>
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
       </QueryClientProvider>
     </AppProvider>,

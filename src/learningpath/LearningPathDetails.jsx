@@ -24,6 +24,7 @@ import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { buildCourseAboutUrl } from './utils';
 import messages from './message';
+import { useToast } from '../hooks/useToast';
 
 const LearningPathDetailPage = () => {
   const { formatMessage } = useIntl();
@@ -49,7 +50,7 @@ const LearningPathDetailPage = () => {
 
   const { data: learningPaths, isLoading: loadingLearningPaths } = useLearningPaths();
 
-  const key = learningPaths?.find((lp) => lp.slug === catalogId).id;
+  const key = learningPaths?.find((lp) => lp.slug === catalogId)?.id;
 
   const {
     data: detail,
@@ -65,25 +66,28 @@ const LearningPathDetailPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const enrollMutation = useEnrollLearningPath();
+  const { showToast } = useToast();
 
   const handleDoNotShare = () => {
     setIsModalOpen(false);
   };
 
-  const handleAllowAndContinue = async () => {
+  const handleAllowAndContinue = () => {
     if (detail && !detail.enrollmentDate) {
       setEnrolling(true);
       setIsModalOpen(false);
-      try {
-        await enrollMutation.mutateAsync(key);
-        setLocalStatus('accepted');
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Enrollment failed:', error);
-      } finally {
-        setActiveTab('courses');
-        setEnrolling(false);
-      }
+      enrollMutation.mutate(key, {
+        onSuccess: () => {
+          setLocalStatus('accepted');
+          setEnrolling(false);
+          setActiveTab('courses');
+        },
+        onError: ({ response }) => {
+          showToast(response.data.detail);
+          setEnrolling(false);
+        },
+
+      });
     }
   };
 
@@ -172,10 +176,12 @@ const LearningPathDetailPage = () => {
   } else if (detailError || !detail) {
     content = (
       <div className="p-4">
-        <p>{formatMessage(messages.failedToLoadDetail)}</p>
+        <p className="text-center">{formatMessage(messages.failedToLoadDetail)}</p>
         <Link to="/">
-          <Icon src={ChevronLeft} />
-          <span>{formatMessage(messages.backToMyCatalogs)}</span>
+          <Stack direction="horizontal">
+            <Icon src={ChevronLeft} />
+            <span>{formatMessage(messages.backToMyCatalogs)}</span>
+          </Stack>
         </Link>
       </div>
     );
@@ -338,6 +344,7 @@ const LearningPathDetailPage = () => {
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
                       onCourseClick={handleCourseViewButton}
+                      isEnrolledInLearningPath={isEnrolledInLearningPath}
                     />
                   )}
                 </section>
