@@ -186,3 +186,12 @@ export async function fetchOrganizations() {
     logo: org.logo,
   })));
 }
+
+export async function getCourseCertificate(courseId) {
+  const client = getAuthenticatedHttpClient();
+  const user = getAuthenticatedUser();
+  const response = await client.get(
+    `${getConfig().LMS_BASE_URL}/api/certificates/v0/certificates/${user.username}/courses/${courseId}/`,
+  );
+  return camelCaseObject(response.data);
+}
