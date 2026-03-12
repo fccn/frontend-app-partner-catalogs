@@ -36,7 +36,7 @@ const LearningPathDetailPage = () => {
   const { isMedium, isLarge } = useScreenSize();
   const { org, key: catalogId } = useParams();
   const navigate = useNavigate();
-  const [queryParams] = useSearchParams();
+  const [queryParams, setQueryParams] = useSearchParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
@@ -78,11 +78,12 @@ const LearningPathDetailPage = () => {
   const declineInvitationMutation = useDeclineInvitation();
 
   const handleCloseConfirmationModal = () => setIsOpenConfirmationModal(false);
+  const handleCloseGDPRModal = () => setIsModalOpen(false);
 
   const handleDeclineInvitation = () => {
     declineInvitationMutation.mutate(key, {
       onSuccess: () => {
-        setIsModalOpen(false);
+        handleCloseGDPRModal();
         navigate('/');
       },
       onError: ({ response }) => {
@@ -96,14 +97,14 @@ const LearningPathDetailPage = () => {
     if (decline) {
       setIsOpenConfirmationModal(true);
     } else {
-      setIsModalOpen(false);
+      handleCloseGDPRModal();
     }
   };
 
   const handleAllowAndContinue = () => {
     if (detail && !detail.enrollmentDate) {
       setEnrolling(true);
-      setIsModalOpen(false);
+      handleCloseGDPRModal();
       enrollMutation.mutate(key, {
         onSuccess: () => {
           setLocalStatus('accepted');
@@ -156,13 +157,23 @@ const LearningPathDetailPage = () => {
   const handleEnrollClick = async () => {
     setIsModalOpen(true);
   };
+  const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
+  const isEnrolledInLearningPath = status === 'accepted';
+  const openParam = queryParams.get('open');
 
   useEffect(() => {
-    const openEnrollModal = queryParams.get('open');
-    if (openEnrollModal === 'true') {
+    if (openParam === 'true' && !isEnrolledInLearningPath) {
       setIsModalOpen(true);
+      return;
     }
-  }, [queryParams]);
+
+    handleCloseGDPRModal();
+
+    const params = new URLSearchParams(queryParams);
+    params.delete('open');
+    setQueryParams(params, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openParam, isEnrolledInLearningPath]);
 
   // TODO: Retrieve this from the backend.
   const { data: organizations = {} } = useOrganizations();
@@ -175,8 +186,6 @@ const LearningPathDetailPage = () => {
     [organizations, org],
   );
 
-  const status = (localStatus || detail?.status || 'self enrollment').toLowerCase();
-  const isEnrolledInLearningPath = status === 'accepted';
   let statusVariant = 'pending';
   let statusAltText = formatMessage(messages.selfEnrollment);
 

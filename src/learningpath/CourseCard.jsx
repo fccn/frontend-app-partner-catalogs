@@ -17,7 +17,7 @@ import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
-  useCourseEnrollments, useCourseCertificate,
+  useCatalogCourses, useCourseCertificate,
 } from './data/queries';
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
@@ -206,14 +206,16 @@ export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
   const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
-  const { data: enrollments } = useCourseEnrollments(course.id);
+  const { data: catalogCourses } = useCatalogCourses(learningPathId);
   const [enrolling, setEnrolling] = useState(false);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
   const { showToast } = useToast();
 
   const courseWithEnrollment = {
     ...course,
-    enrollmentsQuantity: enrollments?.count ?? 0,
+    enrollmentsQuantity: catalogCourses?.find(
+      (catalogCourse) => catalogCourse.courseRun.id === course.id,
+    )?.enrollments ?? 0,
     isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
     checkingEnrollment: checkingEnrollment || enrolling,
   };
