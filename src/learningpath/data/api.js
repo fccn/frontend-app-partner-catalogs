@@ -114,6 +114,13 @@ export async function enrollInLearningPath(learningPathId) {
   );
 }
 
+export async function declineInvitation(learningPathId) {
+  const client = getAuthenticatedHttpClient();
+  return client.post(
+    `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/decline/`,
+  );
+}
+
 export async function enrollInCourse(learningPathId, courseId) {
   const client = getAuthenticatedHttpClient();
   return client.post(

@@ -1,8 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import {
+  useParams, Link, useSearchParams, useNavigate,
+} from 'react-router-dom';
 import {
   Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
   Stack,
+  AlertModal,
+  ActionRow,
 } from '@openedx/paragon';
 import {
   Person,
@@ -17,6 +21,7 @@ import { useIntl, FormattedDate } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
   useLearningPaths,
+  useDeclineInvitation,
 } from './data/queries';
 import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
@@ -30,6 +35,7 @@ const LearningPathDetailPage = () => {
   const { formatMessage } = useIntl();
   const { isMedium, isLarge } = useScreenSize();
   const { org, key: catalogId } = useParams();
+  const navigate = useNavigate();
   const [queryParams] = useSearchParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
@@ -65,11 +71,33 @@ const LearningPathDetailPage = () => {
   }, [detail, activeTab]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenConfirmationModal, setIsOpenConfirmationModal] = useState(false);
+
   const enrollMutation = useEnrollLearningPath();
   const { showToast } = useToast();
+  const declineInvitationMutation = useDeclineInvitation();
 
-  const handleDoNotShare = () => {
-    setIsModalOpen(false);
+  const handleCloseConfirmationModal = () => setIsOpenConfirmationModal(false);
+
+  const handleDeclineInvitation = () => {
+    declineInvitationMutation.mutate(key, {
+      onSuccess: () => {
+        setIsModalOpen(false);
+        navigate('/');
+      },
+      onError: ({ response }) => {
+        showToast(response.data.detail);
+      },
+
+    });
+  };
+
+  const handleDoNotShare = (decline = false) => {
+    if (decline) {
+      setIsOpenConfirmationModal(true);
+    } else {
+      setIsModalOpen(false);
+    }
   };
 
   const handleAllowAndContinue = () => {
@@ -86,7 +114,6 @@ const LearningPathDetailPage = () => {
           showToast(response.data.detail);
           setEnrolling(false);
         },
-
       });
     }
   };
@@ -385,6 +412,24 @@ const LearningPathDetailPage = () => {
 
   return (
     <>
+      <AlertModal
+        title={formatMessage(messages.headsUp)}
+        isOpen={isOpenConfirmationModal}
+        onClose={handleCloseConfirmationModal}
+        footerNode={(
+          <ActionRow>
+            <Button variant="tertiary" onClick={handleCloseConfirmationModal}>
+              {formatMessage(messages.cancel)}
+            </Button>
+            <Button variant="danger" onClick={handleDeclineInvitation}>{formatMessage(messages.confirm)}</Button>
+          </ActionRow>
+        )}
+      >
+        <p>
+          {formatMessage(messages.declineConfirmationMessage)}
+        </p>
+      </AlertModal>
+
       {content}
 
       {selectedCourseKey && (

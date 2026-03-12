@@ -54,7 +54,7 @@ const DataSharingAuthorizationModal = ({
       </ModalDialog.Body>
 
       <ModalDialog.Footer>
-        <Button className="mr-2" variant="tertiary" onClick={onClose}>
+        <Button className="mr-2" variant="tertiary" onClick={() => onClose(true)}>
           {formatMessage(messages.dataSharingDoNotShare)}
         </Button>
         <Button variant="primary" onClick={onAllow}>
