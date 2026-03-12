@@ -109,40 +109,16 @@ export async function fetchAllCourseCompletions() {
 
 export async function enrollInLearningPath(learningPathId) {
   const client = getAuthenticatedHttpClient();
-  try {
-    const response = await client.post(
-      `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/enroll/`,
-    );
-    return {
-      success: true,
-      status: response.status,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      status: error.response?.status,
-      error,
-    };
-  }
+  return client.post(
+    `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/enroll/`,
+  );
 }
 
 export async function enrollInCourse(learningPathId, courseId) {
   const client = getAuthenticatedHttpClient();
-  try {
-    const response = await client.post(
-      `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/courses/${courseId}/enroll/`,
-    );
-    return {
-      success: true,
-      status: response.status,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      status: error.response?.status,
-      error,
-    };
-  }
+  return client.post(
+    `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/courses/${courseId}/enroll/`,
+  );
 }
 
 export async function fetchCourseEnrollmentStatus(courseId) {

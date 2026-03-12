@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Card, Button, Icon,
+  Stack,
 } from '@openedx/paragon';
 import {
   AccessTime,
@@ -10,6 +11,7 @@ import {
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { useToast } from '../hooks/useToast';
 import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
@@ -140,27 +142,26 @@ export const CourseCard = ({
       </Card.Section>
 
       <Card.Footer>
-        <div className="d-flex flex-column flex-lg-row w-100">
+        <Stack className="w-100" direction={isMedium ? 'vertical' : 'horizontal'} gap={2}>
           <Button
             variant="outline-primary"
             size="sm"
-            className="flex-fill py-2 mr-2"
+            className="flex-fill py-2"
             onClick={onClickViewButton}
           >
             {formatMessage(messages.moreDetails)}
           </Button>
 
-          {!disableStartButton && (
           <Button
             variant="primary"
             size="sm"
+            disabled={disableStartButton}
             className="flex-fill py-2"
             onClick={onClick}
           >
             { buttonText }
           </Button>
-          )}
-        </div>
+        </Stack>
       </Card.Footer>
     </Card>
   );
@@ -194,6 +195,7 @@ export const CourseCardWithEnrollment = ({
   const { data: enrollments } = useCourseEnrollments(course.id);
   const [enrolling, setEnrolling] = useState(false);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
+  const { showToast } = useToast();
 
   const courseWithEnrollment = {
     ...course,
@@ -213,20 +215,16 @@ export const CourseCardWithEnrollment = ({
     }
 
     setEnrolling(true);
-    try {
-      const result = await enrollCourseMutation.mutateAsync(course.id);
-      if (result.success) {
+    enrollCourseMutation.mutate(course.id, {
+      onSuccess: () => {
         window.location.href = courseHomeUrl;
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('Failed to enroll in the course:', result.data?.error || 'Unknown error');
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to enroll in the course:', error);
-    } finally {
-      setEnrolling(false);
-    }
+        setEnrolling(false);
+      },
+      onError: ({ response }) => {
+        showToast(response.data.detail);
+        setEnrolling(false);
+      },
+    });
   };
 
   return (
