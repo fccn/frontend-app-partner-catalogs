@@ -16,6 +16,12 @@ export async function fetchLearningPathDetail(key) {
   return camelCaseObject(response.data);
 }
 
+export async function fetchCatalogCourses(catalogId) {
+  const client = getAuthenticatedHttpClient();
+  const response = await client.get(`${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${catalogId}/courses/?page_size=10000`);
+  return camelCaseObject(response.data.results);
+}
+
 export async function fetchLearnerDashboard() {
   const response = await getAuthenticatedHttpClient().get(`${getConfig().LMS_BASE_URL}/api/learner_home/init/`);
   const courses = response.data.courses || [];
@@ -137,25 +143,6 @@ export async function fetchCourseEnrollmentStatus(courseId) {
     return {
       isEnrolled: response.data?.is_active === true,
       data: camelCaseObject(response.data),
-    };
-  } catch (error) {
-    // Handle API errors - they indicate the user is not enrolled.
-    return {
-      isEnrolled: false,
-      error,
-    };
-  }
-}
-
-export async function fetchCourseEnrollments(courseId) {
-  const client = getAuthenticatedHttpClient();
-  try {
-    const url = new URL(`${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollments`);
-    url.searchParams.append('course_id', courseId);
-    const response = await client.get(url.toString());
-    return {
-      count: response.data.results.length,
-      data: camelCaseObject(response.data.results),
     };
   } catch (error) {
     // Handle API errors - they indicate the user is not enrolled.

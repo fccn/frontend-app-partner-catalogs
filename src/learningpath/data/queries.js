@@ -21,6 +21,7 @@ export const QUERY_KEYS = {
   COURSE_ENROLLMENTS: (courseId) => ['courseEnrollments', courseId],
   ORGANIZATIONS: ['organizations'],
   CERTIFICATE: (courseId) => ['certificate', courseId],
+  CATALOG_COURSES: (key) => ['catalogCourses', key],
 };
 
 // Stale time configurations
@@ -310,11 +311,11 @@ export const useCourseEnrollmentStatus = (courseId) => useQuery({
   refetchOnWindowFocus: false,
 });
 
-export const useCourseEnrollments = (courseId) => useQuery({
-  queryKey: QUERY_KEYS.COURSE_ENROLLMENTS(courseId),
-  queryFn: () => api.fetchCourseEnrollments(courseId),
-  enabled: !!courseId,
-  staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
+export const useCatalogCourses = (learningPathId) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(learningPathId),
+  queryFn: () => api.fetchCatalogCourses(learningPathId),
+  enabled: !!learningPathId,
+  staleTime: STALE_TIMES.CATALOG_COURSES,
   refetchOnWindowFocus: false,
 });
 
