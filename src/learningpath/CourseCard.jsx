@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Card, Button, Icon,
@@ -16,7 +16,7 @@ import { useToast } from '../hooks/useToast';
 import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
-  usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
+  usePrefetchCourseDetail, useEnrollCourse, useOrganizations,
   useCatalogCourses, useCourseCertificate,
 } from './data/queries';
 import { buildCourseHomeUrl } from './utils';
@@ -37,7 +37,7 @@ export const CourseCard = ({
     courseImageAssetPath,
     startDate,
     status,
-    checkingEnrollment,
+    isEnrolling,
   } = course;
 
   const dateDisplay = startDate
@@ -87,11 +87,11 @@ export const CourseCard = ({
       break;
   }
 
-  if (checkingEnrollment) {
+  if (isEnrolling) {
     buttonText = formatMessage(messages.loadingText);
   }
 
-  const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
+  const disableStartButton = isEnrolling || isEnrolledInLearningPath === false;
 
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
@@ -191,7 +191,7 @@ CourseCard.propTypes = {
     endDate: PropTypes.string,
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
-    checkingEnrollment: PropTypes.bool,
+    isEnrolling: PropTypes.bool,
     enrollmentsQuantity: PropTypes.number.isRequired,
     duration: PropTypes.string,
   }).isRequired,
@@ -205,9 +205,7 @@ CourseCard.propTypes = {
 export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
-  const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
   const { data: catalogCourses } = useCatalogCourses(learningPathId);
-  const [enrolling, setEnrolling] = useState(false);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
   const { showToast } = useToast();
 
@@ -216,8 +214,7 @@ export const CourseCardWithEnrollment = ({
     enrollmentsQuantity: catalogCourses?.find(
       (catalogCourse) => catalogCourse.courseRun.id === course.id,
     )?.enrollments ?? 0,
-    isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
-    checkingEnrollment: checkingEnrollment || enrolling,
+    isEnrolling: enrollCourseMutation.isPending,
   };
 
   const courseHomeUrl = buildCourseHomeUrl(course.id);
@@ -225,20 +222,17 @@ export const CourseCardWithEnrollment = ({
   const handleCourseAction = async () => {
     const { administrator } = getAuthenticatedUser();
 
-    if (courseWithEnrollment.isEnrolledInCourse || administrator) {
+    if (administrator) {
       window.location.href = courseHomeUrl;
       return;
     }
 
-    setEnrolling(true);
     enrollCourseMutation.mutate(course.id, {
       onSuccess: () => {
         window.location.href = courseHomeUrl;
-        setEnrolling(false);
       },
       onError: ({ response }) => {
         showToast(response.data.detail);
-        setEnrolling(false);
       },
     });
   };
@@ -250,7 +244,6 @@ export const CourseCardWithEnrollment = ({
       onClickViewButton={onClick}
       isEnrolledInLearningPath={isEnrolledInLearningPath}
       orientationOverride={orientationOverride}
-      isEnrolledInCourse={courseWithEnrollment.isEnrolledInCourse}
     />
   );
 };
