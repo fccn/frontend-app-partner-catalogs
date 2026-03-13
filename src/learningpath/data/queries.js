@@ -20,6 +20,7 @@ export const QUERY_KEYS = {
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
   COURSE_ENROLLMENTS: (courseId) => ['courseEnrollments', courseId],
   ORGANIZATIONS: ['organizations'],
+  CERTIFICATE: (courseId) => ['certificate', courseId],
 };
 
 // Stale time configurations
@@ -386,4 +387,10 @@ export const useOrganizations = () => useQuery({
     return organizationsMap;
   },
   staleTime: STALE_TIMES.ORGANIZATIONS,
+});
+
+export const useCourseCertificate = (courseId, status) => useQuery({
+  queryKey: QUERY_KEYS.CERTIFICATE(courseId),
+  queryFn: () => api.getCourseCertificate(courseId),
+  enabled: !!courseId && status === 'completed',
 });

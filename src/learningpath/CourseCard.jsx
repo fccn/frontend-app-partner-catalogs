@@ -11,12 +11,13 @@ import {
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { getConfig } from '@edx/frontend-platform';
 import { useToast } from '../hooks/useToast';
 import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
-  useCourseEnrollments,
+  useCourseEnrollments, useCourseCertificate,
 } from './data/queries';
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
@@ -59,10 +60,22 @@ export const CourseCard = ({
   };
 
   let buttonText = formatMessage(messages.startCourse);
+  let handleClick = onClick;
+  let anchorProps;
+
+  const { data: courseCertificate } = useCourseCertificate(course.id, status?.toLowerCase());
+  const certificateURL = courseCertificate?.downloadUrl;
 
   switch (status?.toLowerCase()) {
     case 'completed':
       buttonText = formatMessage(messages.viewCertificate);
+      handleClick = null;
+      anchorProps = {
+        as: 'a',
+        href: `${getConfig().LMS_BASE_URL}${certificateURL ?? ''}`,
+        target: '_blank',
+        disabled: !certificateURL,
+      };
       break;
     case 'not started':
       buttonText = formatMessage(messages.startCourse);
@@ -157,7 +170,8 @@ export const CourseCard = ({
             size="sm"
             disabled={disableStartButton}
             className="flex-fill py-2"
-            onClick={onClick}
+            onClick={handleClick}
+            {...anchorProps}
           >
             { buttonText }
           </Button>
