@@ -209,13 +209,22 @@ export const CourseCardWithEnrollment = ({
   const enrollCourseMutation = useEnrollCourse(learningPathId);
   const { showToast } = useToast();
 
-  const courseWithEnrollment = {
+  const enrollmentsMap = useMemo(() => {
+    if (!catalogCourses) { return new Map(); }
+
+    return new Map(
+      catalogCourses.map(({ courseRun, enrollments }) => [
+        courseRun.id,
+        enrollments,
+      ]),
+    );
+  }, [catalogCourses]);
+
+  const courseWithEnrollment = useMemo(() => ({
     ...course,
-    enrollmentsQuantity: catalogCourses?.find(
-      (catalogCourse) => catalogCourse.courseRun.id === course.id,
-    )?.enrollments ?? 0,
+    enrollmentsQuantity: enrollmentsMap.get(course.id) ?? 0,
     isEnrolling: enrollCourseMutation.isPending,
-  };
+  }), [course, enrollmentsMap, enrollCourseMutation.isPending]);
 
   const courseHomeUrl = buildCourseHomeUrl(course.id);
 
@@ -232,7 +241,7 @@ export const CourseCardWithEnrollment = ({
         window.location.href = courseHomeUrl;
       },
       onError: ({ response }) => {
-        showToast(response.data.detail);
+        showToast(response?.data?.detail || 'Enrollment failed');
       },
     });
   };

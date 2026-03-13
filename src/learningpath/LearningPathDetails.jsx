@@ -162,7 +162,9 @@ const LearningPathDetailPage = () => {
   const openParam = queryParams.get('open');
 
   useEffect(() => {
-    if (openParam === 'true' && !isEnrolledInLearningPath) {
+    const shouldOpenModal = openParam === 'true' && !isEnrolledInLearningPath;
+
+    if (shouldOpenModal) {
       setIsModalOpen(true);
       return;
     }
