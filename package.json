@@ -1,10 +1,10 @@
 {
-  "name": "@open-craft/frontend-app-learning-paths",
+  "name": "@open-craft/frontend-app-partner-catalogs",
   "version": "0.1.3",
   "description": "Frontend application template",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/open-craft/frontend-app-learning-paths.git"
+    "url": "git+https://github.com/fccn/frontend-app-partner-catalogs.git"
   },
   "browserslist": [
     "extends @edx/browserslist-config"
@@ -16,7 +16,7 @@
     "lint:fix": "fedx-scripts eslint --fix --ext .js --ext .jsx --ext .ts --ext .tsx .",
     "snapshot": "fedx-scripts jest --updateSnapshot",
     "start": "fedx-scripts webpack-dev-server --progress",
-    "dev": "MFE_CONFIG_API_URL='http://local.openedx.io:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.local.openedx.io",
+    "dev": "MFE_CONFIG_API_URL='http://lms.local.openedx.io:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.lms.local.openedx.io",
     "start:with-theme": "paragon install-theme && npm start && npm install",
     "test": "fedx-scripts jest --coverage --passWithNoTests",
     "types": "tsc --noEmit"
@@ -28,12 +28,12 @@
   },
   "author": "edX",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/open-craft/frontend-app-learning-paths#readme",
+  "homepage": "https://github.com/fccn/frontend-app-partner-catalogs#readme",
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/open-craft/frontend-app-learning-paths/issues"
+    "url": "https://github.com/fccn/frontend-app-partner-catalogs/issues"
   },
   "dependencies": {
     "@edx/brand": "npm:@openedx/brand-openedx@^1.2.3",
