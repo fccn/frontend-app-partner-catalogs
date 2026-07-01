@@ -412,12 +412,19 @@ const Dashboard = () => {
                     </Col>
                   ))}
                   <Pagination
-                    paginationLabel="learning items navigation"
+                    paginationLabel={formatMessage(messages.paginationNavLabel)}
                     variant={isSmall ? 'reduced' : 'default'}
                     pageCount={totalPages}
                     currentPage={currentPage}
                     onPageSelect={page => setCurrentPage(page)}
                     className="d-flex justify-content-center mt-4"
+                    buttonLabels={{
+                      previous: formatMessage(messages.paginationPrevious),
+                      next: formatMessage(messages.paginationNext),
+                      page: formatMessage(messages.paginationPage),
+                      currentPage: formatMessage(messages.paginationCurrentPage),
+                      pageOfCount: formatMessage(messages.paginationPageOfCount),
+                    }}
                   />
                 </>
               )}

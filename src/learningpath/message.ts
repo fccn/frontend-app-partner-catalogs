@@ -102,6 +102,13 @@ const messages = defineMessages({
   progressStatusAria: { id: 'learningpath.progress.aria', defaultMessage: 'Progress status: {status}' },
   pendingInvitation: { id: 'learningpath.status.pending_invitation', defaultMessage: 'Pending Invitation' },
   activeStatus: { id: 'learningpath.status.active', defaultMessage: 'Active' },
+
+  paginationPrevious: { id: 'learningpath.pagination.previous', defaultMessage: 'Previous' },
+  paginationNext: { id: 'learningpath.pagination.next', defaultMessage: 'Next' },
+  paginationPage: { id: 'learningpath.pagination.page', defaultMessage: 'Page' },
+  paginationCurrentPage: { id: 'learningpath.pagination.current_page', defaultMessage: 'Current Page' },
+  paginationPageOfCount: { id: 'learningpath.pagination.page_of_count', defaultMessage: 'of' },
+  paginationNavLabel: { id: 'learningpath.pagination.nav_label', defaultMessage: 'learning items navigation' },
 });
 
 export default messages;
