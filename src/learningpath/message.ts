@@ -79,12 +79,12 @@ const messages = defineMessages({
   dataSharingLi1: { id: 'learningpath.data_sharing.li1', defaultMessage: 'You have been invited or your email is eligible for this corporate catalog.' },
   dataSharingLi2: { id: 'learningpath.data_sharing.li2', defaultMessage: 'You understand that the shared information includes data such as your course progress, grades, and completion status.' },
   dataSharingLi3: { id: 'learningpath.data_sharing.li3', defaultMessage: 'You consent to {partnerName} receiving this information in accordance with applicable data protection laws (GDPR).' },
-  dataSharingConfirm: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Do you authorize sharing your data for this course with {partnerName}?' },
+  dataSharingConfirm: { id: 'learningpath.data_sharing.confirm_question', defaultMessage: 'Do you authorize sharing your data for this course with {partnerName}?' },
   dataSharingDoNotShare: { id: 'learningpath.data_sharing.do_not_share', defaultMessage: 'Do Not Share' },
   dataSharingAllowAndContinue: { id: 'learningpath.data_sharing.allow_and_continue', defaultMessage: 'Allow and Continue' },
   cancel: { id: 'learningpath.data_sharing.cancel', defaultMessage: 'Cancel' },
   confirm: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Confirm' },
-  headsUp: { id: 'learningpath.data_sharing.confirm', defaultMessage: 'Heads Up!' },
+  headsUp: { id: 'learningpath.data_sharing.heads_up', defaultMessage: 'Heads Up!' },
   declineConfirmationMessage: { id: 'learningpath.data_sharing.declineConfirmationMessage', defaultMessage: 'Declining this invitation cannot be undone. An administrator will need to resend it if you wish to accept later' },
   // Additional messages used across learningpath components
   activateAccountAlert: { id: 'learningpath.dashboard.activate_account', defaultMessage: 'Activate your account! Check your inbox for an account activation link from {siteName}.' },
@@ -102,6 +102,13 @@ const messages = defineMessages({
   progressStatusAria: { id: 'learningpath.progress.aria', defaultMessage: 'Progress status: {status}' },
   pendingInvitation: { id: 'learningpath.status.pending_invitation', defaultMessage: 'Pending Invitation' },
   activeStatus: { id: 'learningpath.status.active', defaultMessage: 'Active' },
+
+  paginationPrevious: { id: 'learningpath.pagination.previous', defaultMessage: 'Previous' },
+  paginationNext: { id: 'learningpath.pagination.next', defaultMessage: 'Next' },
+  paginationPage: { id: 'learningpath.pagination.page', defaultMessage: 'Page' },
+  paginationCurrentPage: { id: 'learningpath.pagination.current_page', defaultMessage: 'Current Page' },
+  paginationPageOfCount: { id: 'learningpath.pagination.page_of_count', defaultMessage: 'of' },
+  paginationNavLabel: { id: 'learningpath.pagination.nav_label', defaultMessage: 'learning items navigation' },
 });
 
 export default messages;
