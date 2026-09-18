@@ -205,6 +205,7 @@ CourseCard.propTypes = {
 export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
 }) => {
+  const { formatMessage } = useIntl();
   const { data: catalogCourses } = useCatalogCourses(learningPathId);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
   const { showToast } = useToast();
@@ -240,8 +241,8 @@ export const CourseCardWithEnrollment = ({
       onSuccess: () => {
         window.location.href = courseHomeUrl;
       },
-      onError: ({ response }) => {
-        showToast(response?.data?.detail || 'Enrollment failed');
+      onError: () => {
+        showToast(formatMessage(messages.genericErrorAction));
       },
     });
   };
