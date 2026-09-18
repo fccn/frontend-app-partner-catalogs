@@ -27,7 +27,7 @@ import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
-import { buildCourseAboutUrl } from './utils';
+import { buildCourseAboutUrl, getCatalogEnrollmentErrorMessage } from './utils';
 import messages from './message';
 import { useToast } from '../hooks/useToast';
 
@@ -86,8 +86,8 @@ const LearningPathDetailPage = () => {
         handleCloseGDPRModal();
         navigate('/');
       },
-      onError: ({ response }) => {
-        showToast(response.data.detail);
+      onError: () => {
+        showToast(formatMessage(messages.genericErrorAction));
       },
 
     });
@@ -112,7 +112,7 @@ const LearningPathDetailPage = () => {
           setActiveTab('courses');
         },
         onError: ({ response }) => {
-          showToast(response.data.detail);
+          showToast(getCatalogEnrollmentErrorMessage(response, formatMessage));
           setEnrolling(false);
         },
       });
