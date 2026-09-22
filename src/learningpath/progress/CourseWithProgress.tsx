@@ -6,14 +6,12 @@ interface CourseWithProgressProps {
   course: Course;
   learningPathId: string;
   isEnrolledInLearningPath?: boolean | false;
-  onCourseClick: () => void;
 }
 
 const CourseWithProgress: React.FC<CourseWithProgressProps> = ({
   course,
   learningPathId,
   isEnrolledInLearningPath,
-  onCourseClick,
 }) => (
   <div className="course-with-progress">
     <div className="course-card-wrapper">
@@ -21,7 +19,6 @@ const CourseWithProgress: React.FC<CourseWithProgressProps> = ({
         course={course}
         learningPathId={learningPathId}
         isEnrolledInLearningPath={isEnrolledInLearningPath}
-        onClick={onCourseClick}
         orientationOverride="vertical"
       />
     </div>

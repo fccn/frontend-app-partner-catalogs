@@ -25,7 +25,6 @@ import { useScreenSize } from '../hooks/useScreenSize';
 export const CourseCard = ({
   course,
   onClick,
-  onClickViewButton,
   isEnrolledInLearningPath,
   orientationOverride,
   showFilters = false,
@@ -157,15 +156,6 @@ export const CourseCard = ({
       <Card.Footer>
         <Stack className="w-100" direction={isMedium ? 'vertical' : 'horizontal'} gap={2}>
           <Button
-            variant="outline-primary"
-            size="sm"
-            className="flex-fill py-2"
-            onClick={onClickViewButton}
-          >
-            {formatMessage(messages.moreDetails)}
-          </Button>
-
-          <Button
             variant="primary"
             size="sm"
             disabled={disableStartButton}
@@ -196,14 +186,13 @@ CourseCard.propTypes = {
     duration: PropTypes.string,
   }).isRequired,
   onClick: PropTypes.func,
-  onClickViewButton: PropTypes.func,
   isEnrolledInLearningPath: PropTypes.bool,
   showFilters: PropTypes.bool,
   orientationOverride: PropTypes.oneOf(['vertical', 'horizontal']),
 };
 
 export const CourseCardWithEnrollment = ({
-  course, learningPathId, isEnrolledInLearningPath, onClick, orientationOverride,
+  course, learningPathId, isEnrolledInLearningPath, orientationOverride,
 }) => {
   const { data: catalogCourses } = useCatalogCourses(learningPathId);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
@@ -250,7 +239,6 @@ export const CourseCardWithEnrollment = ({
     <CourseCard
       course={courseWithEnrollment}
       onClick={handleCourseAction}
-      onClickViewButton={onClick}
       isEnrolledInLearningPath={isEnrolledInLearningPath}
       orientationOverride={orientationOverride}
     />
@@ -263,6 +251,5 @@ CourseCardWithEnrollment.propTypes = {
   }).isRequired,
   learningPathId: PropTypes.string.isRequired,
   isEnrolledInLearningPath: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
   orientationOverride: PropTypes.oneOf(['vertical', 'horizontal']),
 };
