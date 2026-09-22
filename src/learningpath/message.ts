@@ -50,7 +50,6 @@ const messages = defineMessages({
   tryAnotherSearch: { id: 'learningpath.dashboard.try_another_search', defaultMessage: 'Try another search or clear your filters' },
   noResultsAlt: { id: 'learningpath.dashboard.no_results_alt', defaultMessage: 'No results' },
 
-  moreDetails: { id: 'learningpath.course.more_details', defaultMessage: 'More Details' },
   startCourse: { id: 'learningpath.course.start_course', defaultMessage: 'Start Course' },
   viewCertificate: { id: 'learningpath.course.view_certificate', defaultMessage: 'View Certificate' },
   continueText: { id: 'learningpath.course.continue', defaultMessage: 'Continue' },

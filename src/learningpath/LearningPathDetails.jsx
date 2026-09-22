@@ -3,7 +3,7 @@ import {
   useParams, Link, useSearchParams, useNavigate,
 } from 'react-router-dom';
 import {
-  Row, Spinner, Icon, ModalLayer, Button, Chip, Card, Collapsible, Col,
+  Row, Spinner, Icon, Button, Chip, Card, Collapsible, Col,
   Stack,
   AlertModal,
   ActionRow,
@@ -23,11 +23,9 @@ import {
   useLearningPaths,
   useDeclineInvitation,
 } from './data/queries';
-import CourseDetailPage from './CourseDetails';
 import DataSharingAuthorizationModal from './DataSharingAuthorizationModal';
 import { CoursesWithProgressList } from './progress';
 import { useScreenSize } from '../hooks/useScreenSize';
-import { buildCourseAboutUrl } from './utils';
 import messages from './message';
 import { useToast } from '../hooks/useToast';
 
@@ -37,7 +35,6 @@ const LearningPathDetailPage = () => {
   const { org, key: catalogId } = useParams();
   const navigate = useNavigate();
   const [queryParams, setQueryParams] = useSearchParams();
-  const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [openCollapsible, setOpenCollapsible] = useState(null);
   const [localStatus, setLocalStatus] = useState(null);
@@ -143,16 +140,6 @@ const LearningPathDetailPage = () => {
     }
     return maxDate;
   }, [coursesForPath]);
-
-  // In the details view, open the course details modal.
-  const handleCourseViewButton = (courseId) => {
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 10);
-    window.open(buildCourseAboutUrl(courseId), '_blank', 'noopener,noreferrer');
-  };
-
-  const handleCloseCourseModal = () => {
-    setSelectedCourseKey(null);
-  };
 
   const handleEnrollClick = async () => {
     setIsModalOpen(true);
@@ -381,7 +368,6 @@ const LearningPathDetailPage = () => {
                       courses={coursesForPath}
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
-                      onCourseClick={handleCourseViewButton}
                       isEnrolledInLearningPath={isEnrolledInLearningPath}
                     />
                   )}
@@ -401,7 +387,6 @@ const LearningPathDetailPage = () => {
                       learningPathSteps={detail?.steps}
                       learningPathId={key}
                       isEnrolledInLearningPath={isEnrolledInLearningPath}
-                      onCourseClick={handleCourseViewButton}
                     />
                   )}
                 </section>
@@ -442,21 +427,6 @@ const LearningPathDetailPage = () => {
       </AlertModal>
 
       {content}
-
-      {selectedCourseKey && (
-        <ModalLayer
-          isOpen
-          onClose={handleCloseCourseModal}
-          className="lp-course-modal-layer"
-        >
-          <CourseDetailPage
-            isModalView
-            courseKey={selectedCourseKey}
-            onClose={handleCloseCourseModal}
-            learningPathTitle={detail?.name}
-          />
-        </ModalLayer>
-      )}
     </>
   );
 };
