@@ -29,6 +29,16 @@ import { useScreenSize } from '../hooks/useScreenSize';
 import messages from './message';
 import { useToast } from '../hooks/useToast';
 
+/**
+ * Error codes returned in `code` by the catalog enrollment endpoint
+ * (POST /partner_catalog/api/v1/catalogs/{id}/enroll/),
+ * mirroring `default_code` in openedx-corporate `partner_catalog/exceptions.py`.
+ */
+export const CATALOG_ENROLLMENT_API_ERROR = Object.freeze({
+  USER_LIMIT_REACHED: 'user_limit_reached',
+  CATALOG_UNAVAILABLE: 'catalog_unavailable',
+});
+
 const LearningPathDetailPage = () => {
   const { formatMessage } = useIntl();
   const { isMedium, isLarge } = useScreenSize();
@@ -83,8 +93,8 @@ const LearningPathDetailPage = () => {
         handleCloseGDPRModal();
         navigate('/');
       },
-      onError: ({ response }) => {
-        showToast(response.data.detail);
+      onError: () => {
+        showToast(formatMessage(messages.genericErrorAction));
       },
 
     });
@@ -109,7 +119,16 @@ const LearningPathDetailPage = () => {
           setActiveTab('courses');
         },
         onError: ({ response }) => {
-          showToast(response.data.detail);
+          switch (response?.data?.code) {
+            case CATALOG_ENROLLMENT_API_ERROR.USER_LIMIT_REACHED:
+              showToast(formatMessage(messages.userLimitReached));
+              break;
+            case CATALOG_ENROLLMENT_API_ERROR.CATALOG_UNAVAILABLE:
+              showToast(formatMessage(messages.catalogUnavailable));
+              break;
+            default:
+              showToast(formatMessage(messages.genericErrorAction));
+          }
           setEnrolling(false);
         },
       });
