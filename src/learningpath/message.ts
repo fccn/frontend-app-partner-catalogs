@@ -108,6 +108,32 @@ const messages = defineMessages({
   paginationCurrentPage: { id: 'learningpath.pagination.current_page', defaultMessage: 'Current Page' },
   paginationPageOfCount: { id: 'learningpath.pagination.page_of_count', defaultMessage: 'of' },
   paginationNavLabel: { id: 'learningpath.pagination.nav_label', defaultMessage: 'learning items navigation' },
+
+  genericErrorAction: {
+    id: 'learningpath.error.generic_action',
+    defaultMessage: 'We could not perform this action. Please try again later.',
+    description: 'Fallback error shown when an action (enroll, decline) fails for a reason without a specific message',
+  },
+  userLimitReached: {
+    id: 'learningpath.error.user_limit_reached',
+    defaultMessage: 'This catalog has no seats available at the moment. Contact your training manager to request access.',
+    description: 'Error shown when a learner tries to join a catalog (accept an invitation) but it has no seats left',
+  },
+  catalogUnavailable: {
+    id: 'learningpath.error.catalog_unavailable',
+    defaultMessage: 'This catalog is not currently available. It can only be accessed within its configured availability period.',
+    description: 'Error shown when a learner tries to join a catalog (accept an invitation) outside its availability period',
+  },
+  courseLimitReached: {
+    id: 'learningpath.error.course_limit_reached',
+    defaultMessage: 'There are no seats left for this course in this catalog. Contact your training manager to request access.',
+    description: 'Error shown when a learner tries to start a paid course but the catalog has no course enrollments left',
+  },
+  notAllowedToEnroll: {
+    id: 'learningpath.error.not_allowed_to_enroll',
+    defaultMessage: 'You cannot enroll in this course because you do not have active access to its catalog. Contact your training manager to request access.',
+    description: 'Error shown when a learner tries to start a course but is not an active learner of the catalog or the catalog is inactive',
+  },
 });
 
 export default messages;

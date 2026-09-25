@@ -22,6 +22,16 @@ import {
 import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
+/**
+ * Error codes returned in `code` by the course enrollment endpoint
+ * (POST /partner_catalog/api/v1/catalogs/{id}/courses/{course_id}/enroll/),
+ * mirroring `default_code` in openedx-corporate `partner_catalog/exceptions.py`.
+ */
+export const COURSE_ENROLLMENT_API_ERROR = Object.freeze({
+  COURSE_LIMIT_REACHED: 'course_limit_reached',
+  NOT_ALLOWED_TO_ENROLL: 'not_allowed_to_enroll',
+});
+
 export const CourseCard = ({
   course,
   onClick,
@@ -194,6 +204,7 @@ CourseCard.propTypes = {
 export const CourseCardWithEnrollment = ({
   course, learningPathId, isEnrolledInLearningPath, orientationOverride,
 }) => {
+  const { formatMessage } = useIntl();
   const { data: catalogCourses } = useCatalogCourses(learningPathId);
   const enrollCourseMutation = useEnrollCourse(learningPathId);
   const { showToast } = useToast();
@@ -230,7 +241,16 @@ export const CourseCardWithEnrollment = ({
         window.location.href = courseHomeUrl;
       },
       onError: ({ response }) => {
-        showToast(response?.data?.detail || 'Enrollment failed');
+        switch (response?.data?.code) {
+          case COURSE_ENROLLMENT_API_ERROR.COURSE_LIMIT_REACHED:
+            showToast(formatMessage(messages.courseLimitReached));
+            break;
+          case COURSE_ENROLLMENT_API_ERROR.NOT_ALLOWED_TO_ENROLL:
+            showToast(formatMessage(messages.notAllowedToEnroll));
+            break;
+          default:
+            showToast(formatMessage(messages.genericErrorAction));
+        }
       },
     });
   };
