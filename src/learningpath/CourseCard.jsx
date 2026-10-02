@@ -238,6 +238,10 @@ export const CourseCardWithEnrollment = ({
 
     enrollCourseMutation.mutate(course.id, {
       onSuccess: () => {
+        // Full-page navigation discards the React Query cache, so the
+        // invalidations in useEnrollCourse have no visible effect here: the
+        // enrollment counts are refetched when the learner comes back. They
+        // only take effect if this is changed to stay on the page.
         window.location.href = courseHomeUrl;
       },
       onError: ({ response }) => {

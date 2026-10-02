@@ -32,6 +32,7 @@ export const STALE_TIMES = {
   COURSES: 5 * 60 * 1000, // 5 minutes
   COURSE_DETAIL: 5 * 60 * 1000, // 5 minutes
   COURSE_ENROLLMENTS: 60 * 1000, // 1 minute
+  CATALOG_COURSES: 60 * 1000, // 1 minute
 
   COMPLETIONS: 60 * 1000, // 1 minute
 
@@ -312,7 +313,7 @@ export const useCourseEnrollmentStatus = (courseId) => useQuery({
 });
 
 export const useCatalogCourses = (learningPathId) => useQuery({
-  queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(learningPathId),
+  queryKey: QUERY_KEYS.CATALOG_COURSES(learningPathId),
   queryFn: () => api.fetchCatalogCourses(learningPathId),
   enabled: !!learningPathId,
   staleTime: STALE_TIMES.CATALOG_COURSES,
@@ -370,7 +371,8 @@ export const useEnrollCourse = (learningPathId) => {
   return useMutation({
     mutationFn: (courseId) => api.enrollInCourse(learningPathId, courseId),
     onSuccess: (_, courseId) => {
-      queryClient.invalidateQueries(QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId));
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATALOG_COURSES(learningPathId) });
     },
   });
 };
