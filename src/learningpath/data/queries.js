@@ -4,8 +4,10 @@ import * as api from './api';
 import {
   addCompletionStatus,
   addLearningPaths,
+  CERTIFICATE_STATUS,
   createCompletionsMap,
   createCourseToLearningPathsMap,
+  findCourseCertificate,
 } from './dataUtils';
 
 // Query keys
@@ -20,7 +22,7 @@ export const QUERY_KEYS = {
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
   COURSE_ENROLLMENTS: (courseId) => ['courseEnrollments', courseId],
   ORGANIZATIONS: ['organizations'],
-  CERTIFICATE: (courseId) => ['certificate', courseId],
+  CERTIFICATES: ['certificates'],
   CATALOG_COURSES: (key) => ['catalogCourses', key],
 };
 
@@ -37,7 +39,12 @@ export const STALE_TIMES = {
   COMPLETIONS: 60 * 1000, // 1 minute
 
   ORGANIZATIONS: 60 * 60 * 1000, // 1 hour
+
+  CERTIFICATES: 60 * 1000, // 1 minute
 };
+
+// How often the certificates are refetched while one of them is being generated.
+export const CERTIFICATE_GENERATING_REFETCH_INTERVAL = 10 * 1000; // 10 seconds
 
 // Learning Paths Queries
 export const useLearningPaths = () => {
@@ -392,8 +399,18 @@ export const useOrganizations = () => useQuery({
   staleTime: STALE_TIMES.ORGANIZATIONS,
 });
 
-export const useCourseCertificate = (courseId, status) => useQuery({
-  queryKey: QUERY_KEYS.CERTIFICATE(courseId),
-  queryFn: () => api.getCourseCertificate(courseId),
-  enabled: !!courseId && status === 'completed',
+// Every course card reads its certificate from the same cached list, so a page issues a
+// single certificates request whatever the number of courses.
+export const useCourseCertificate = (courseId, { enabled = true } = {}) => useQuery({
+  queryKey: QUERY_KEYS.CERTIFICATES,
+  queryFn: api.fetchCertificates,
+  enabled: !!courseId && enabled,
+  staleTime: STALE_TIMES.CERTIFICATES,
+  select: (certificates) => findCourseCertificate(certificates, courseId),
+  // Keep refetching while a certificate is being generated, so its card enables without a reload.
+  refetchInterval: (query) => (
+    query.state.data?.some?.(({ status }) => status === CERTIFICATE_STATUS.GENERATING)
+      ? CERTIFICATE_GENERATING_REFETCH_INTERVAL
+      : false
+  ),
 });

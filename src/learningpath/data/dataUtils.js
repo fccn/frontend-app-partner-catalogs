@@ -84,3 +84,39 @@ export const addLearningPaths = (course, courseToLearningPathMap) => ({
   ...course,
   learningPaths: courseToLearningPathMap[course.id],
 });
+
+/**
+ * Certificate statuses the LMS treats as passed (`CertificateStatuses.PASSED_STATUSES`),
+ * the ones openedx-corporate counts as certified in `partner_catalog/services/certificates.py`.
+ */
+export const CERTIFICATE_STATUS = Object.freeze({
+  DOWNLOADABLE: 'downloadable',
+  GENERATING: 'generating',
+});
+
+/**
+ * Finds the learner's certificate for a course in the certificates API response.
+ * Course keys are compared case-insensitively, as MySQL does in the LMS, because a
+ * certificate can keep a different casing than the catalog course key.
+ * @param {Array} certificates - Certificates returned by the certificates API
+ * @param {string} courseId - Course ID
+ * @returns {Object|null} The certificate status and download URL, or null when there is
+ * no certificate that is available or being generated
+ */
+export const findCourseCertificate = (certificates, courseId) => {
+  if (!courseId || !Array.isArray(certificates)) {
+    return null;
+  }
+  const courseKey = courseId.toLowerCase();
+  const certificate = certificates.find(cert => cert.courseId?.toLowerCase() === courseKey);
+
+  switch (certificate?.status) {
+    case CERTIFICATE_STATUS.GENERATING:
+      return { status: certificate.status, downloadUrl: null };
+    case CERTIFICATE_STATUS.DOWNLOADABLE:
+      // Without a URL there is nothing to open, so the card falls back to the course progress.
+      return certificate.downloadUrl ? { status: certificate.status, downloadUrl: certificate.downloadUrl } : null;
+    default:
+      return null;
+  }
+};

@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Card, Button, Icon,
+  Card, Button, Chip, Icon,
   Stack,
 } from '@openedx/paragon';
 import {
   AccessTime,
   HowToReg,
   Calendar,
+  Verified,
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
-import { getConfig } from '@edx/frontend-platform';
 import { useToast } from '../hooks/useToast';
 import messages from './message';
 import { buildAssetUrl } from '../util/assetUrl';
@@ -19,7 +19,8 @@ import {
   usePrefetchCourseDetail, useEnrollCourse, useOrganizations,
   useCatalogCourses, useCourseCertificate,
 } from './data/queries';
-import { buildCourseHomeUrl } from './utils';
+import { CERTIFICATE_STATUS } from './data/dataUtils';
+import { buildCertificateUrl, buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 /**
@@ -31,6 +32,9 @@ export const COURSE_ENROLLMENT_API_ERROR = Object.freeze({
   COURSE_LIMIT_REACHED: 'course_limit_reached',
   NOT_ALLOWED_TO_ENROLL: 'not_allowed_to_enroll',
 });
+
+// Centers the label so buttons stretched to the same height keep it in the middle.
+const ACTION_BUTTON_CLASS_NAME = 'flex-fill py-2 d-flex align-items-center justify-content-center';
 
 export const CourseCard = ({
   course,
@@ -68,39 +72,63 @@ export const CourseCard = ({
     prefetchCourseDetail();
   };
 
-  let buttonText = formatMessage(messages.startCourse);
-  let handleClick = onClick;
-  let anchorProps;
+  // Administrators go straight to the course, so their cards do not need the certificate.
+  const { administrator } = getAuthenticatedUser() || {};
+  const { data: certificate } = useCourseCertificate(course.id, { enabled: !administrator });
+  const isCertificateGenerating = certificate?.status === CERTIFICATE_STATUS.GENERATING;
 
-  const { data: courseCertificate } = useCourseCertificate(course.id, status?.toLowerCase());
-  const certificateURL = courseCertificate?.downloadUrl;
-
+  let courseButtonText = formatMessage(messages.startCourse);
   switch (status?.toLowerCase()) {
-    case 'completed':
-      buttonText = formatMessage(messages.viewCertificate);
-      handleClick = null;
-      anchorProps = {
-        as: 'a',
-        href: `${getConfig().LMS_BASE_URL}${certificateURL ?? ''}`,
-        target: '_blank',
-        disabled: !certificateURL,
-      };
-      break;
-    case 'not started':
-      buttonText = formatMessage(messages.startCourse);
-      break;
     case 'in progress':
-      buttonText = formatMessage(messages.continueText);
+      courseButtonText = formatMessage(messages.continueText);
+      break;
+    case 'completed':
+      courseButtonText = formatMessage(certificate ? messages.reviewCourse : messages.continueText);
       break;
     default:
       break;
   }
 
   if (isEnrolling) {
-    buttonText = formatMessage(messages.loadingText);
+    courseButtonText = formatMessage(messages.loadingText);
   }
 
   const disableStartButton = isEnrolling || isEnrolledInLearningPath === false;
+
+  const courseButton = (
+    <Button
+      variant={certificate ? 'outline-primary' : 'primary'}
+      size="sm"
+      disabled={disableStartButton}
+      className={ACTION_BUTTON_CLASS_NAME}
+      onClick={onClick}
+    >
+      {courseButtonText}
+    </Button>
+  );
+
+  let certificateButton = null;
+  if (isCertificateGenerating) {
+    certificateButton = (
+      <Button variant="primary" size="sm" className={ACTION_BUTTON_CLASS_NAME} disabled>
+        {formatMessage(messages.certificateGenerating)}
+      </Button>
+    );
+  } else if (certificate) {
+    certificateButton = (
+      <Button
+        as="a"
+        variant="primary"
+        size="sm"
+        className={ACTION_BUTTON_CLASS_NAME}
+        href={buildCertificateUrl(certificate.downloadUrl)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {formatMessage(messages.viewCertificate)}
+      </Button>
+    );
+  }
 
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
@@ -124,6 +152,12 @@ export const CourseCard = ({
       <Card.Header title={name} subtitle={orgData.name} size="md" />
 
       <Card.Section className="space-y-3 flex-fill">
+        {certificate && (
+          <Chip iconBefore={Verified} className="status-chip status-accepted">
+            {formatMessage(messages.certified)}
+          </Chip>
+        )}
+
         {/* Enrolled Count */}
         <div
           className="text-gray-600 d-flex align-items-center"
@@ -164,17 +198,9 @@ export const CourseCard = ({
       </Card.Section>
 
       <Card.Footer>
-        <Stack className="w-100" direction={isMedium ? 'vertical' : 'horizontal'} gap={2}>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={disableStartButton}
-            className="flex-fill py-2"
-            onClick={handleClick}
-            {...anchorProps}
-          >
-            { buttonText }
-          </Button>
+        <Stack className="w-100 align-items-stretch" direction={isMedium ? 'vertical' : 'horizontal'} gap={2}>
+          {courseButton}
+          {certificateButton}
         </Stack>
       </Card.Footer>
     </Card>

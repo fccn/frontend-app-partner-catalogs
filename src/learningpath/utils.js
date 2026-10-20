@@ -14,6 +14,14 @@ export const buildCourseHomeUrl = (courseId) => {
   return `${sanitizedBase}/course/${courseId}/home`;
 };
 
+/**
+ * Builds the URL of a certificate. The LMS returns a relative path for web certificates
+ * and an absolute URL for PDF certificates.
+ * @param {string} downloadUrl - The certificate `download_url`.
+ * @returns {string} Absolute URL to the certificate.
+ */
+export const buildCertificateUrl = (downloadUrl) => new URL(downloadUrl, getConfig().LMS_BASE_URL).href;
+
 export const buildMarketingSiteCourseUrl = (courseId) => {
   const marketingSiteBase = getConfig().MARKETING_SITE_BASE_URL;
   return `${marketingSiteBase}/${courseId}`;
