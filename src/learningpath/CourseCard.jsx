@@ -20,7 +20,7 @@ import {
   useCatalogCourses, useCourseCertificate,
 } from './data/queries';
 import { CERTIFICATE_STATUS } from './data/dataUtils';
-import { buildCertificateUrl, buildCourseHomeUrl } from './utils';
+import { buildCourseHomeUrl } from './utils';
 import { useScreenSize } from '../hooks/useScreenSize';
 
 /**
@@ -32,9 +32,6 @@ export const COURSE_ENROLLMENT_API_ERROR = Object.freeze({
   COURSE_LIMIT_REACHED: 'course_limit_reached',
   NOT_ALLOWED_TO_ENROLL: 'not_allowed_to_enroll',
 });
-
-// Centers the label so buttons stretched to the same height keep it in the middle.
-const ACTION_BUTTON_CLASS_NAME = 'flex-fill py-2 d-flex align-items-center justify-content-center';
 
 export const CourseCard = ({
   course,
@@ -100,7 +97,7 @@ export const CourseCard = ({
       variant={certificate ? 'outline-primary' : 'primary'}
       size="sm"
       disabled={disableStartButton}
-      className={ACTION_BUTTON_CLASS_NAME}
+      className="flex-fill py-2"
       onClick={onClick}
     >
       {courseButtonText}
@@ -110,7 +107,7 @@ export const CourseCard = ({
   let certificateButton = null;
   if (isCertificateGenerating) {
     certificateButton = (
-      <Button variant="primary" size="sm" className={ACTION_BUTTON_CLASS_NAME} disabled>
+      <Button variant="primary" size="sm" className="flex-fill py-2" disabled>
         {formatMessage(messages.certificateGenerating)}
       </Button>
     );
@@ -120,8 +117,8 @@ export const CourseCard = ({
         as="a"
         variant="primary"
         size="sm"
-        className={ACTION_BUTTON_CLASS_NAME}
-        href={buildCertificateUrl(certificate.downloadUrl)}
+        className="flex-fill py-2"
+        href={certificate.url}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -152,6 +149,7 @@ export const CourseCard = ({
       <Card.Header title={name} subtitle={orgData.name} size="md" />
 
       <Card.Section className="space-y-3 flex-fill">
+        {/* A certificate being generated also counts as certified, as in openedx-corporate. */}
         {certificate && (
           <Chip iconBefore={Verified} className="status-chip status-accepted">
             {formatMessage(messages.certified)}
@@ -198,9 +196,15 @@ export const CourseCard = ({
       </Card.Section>
 
       <Card.Footer>
-        <Stack className="w-100 align-items-stretch" direction={isMedium ? 'vertical' : 'horizontal'} gap={2}>
-          {courseButton}
+        {/* With a certificate the two actions are stacked: side by side, their labels wrap in
+            the narrow catalog columns. */}
+        <Stack
+          className="w-100"
+          direction={isMedium || certificate ? 'vertical' : 'horizontal'}
+          gap={2}
+        >
           {certificateButton}
+          {courseButton}
         </Stack>
       </Card.Footer>
     </Card>

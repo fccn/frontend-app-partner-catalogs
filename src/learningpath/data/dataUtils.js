@@ -1,3 +1,5 @@
+import { buildCertificateUrl } from '../utils';
+
 /**
  * Calculates the completion status based on completion percentage
  * @param {number} completion - Completion percentage (0-1)
@@ -100,7 +102,7 @@ export const CERTIFICATE_STATUS = Object.freeze({
  * certificate can keep a different casing than the catalog course key.
  * @param {Array} certificates - Certificates returned by the certificates API
  * @param {string} courseId - Course ID
- * @returns {Object|null} The certificate status and download URL, or null when there is
+ * @returns {Object|null} The certificate status and absolute URL, or null when there is
  * no certificate that is available or being generated
  */
 export const findCourseCertificate = (certificates, courseId) => {
@@ -112,10 +114,12 @@ export const findCourseCertificate = (certificates, courseId) => {
 
   switch (certificate?.status) {
     case CERTIFICATE_STATUS.GENERATING:
-      return { status: certificate.status, downloadUrl: null };
-    case CERTIFICATE_STATUS.DOWNLOADABLE:
-      // Without a URL there is nothing to open, so the card falls back to the course progress.
-      return certificate.downloadUrl ? { status: certificate.status, downloadUrl: certificate.downloadUrl } : null;
+      return { status: certificate.status, url: null };
+    case CERTIFICATE_STATUS.DOWNLOADABLE: {
+      // Without a usable URL there is nothing to open, so the card falls back to the course progress.
+      const url = certificate.downloadUrl ? buildCertificateUrl(certificate.downloadUrl) : null;
+      return url ? { status: certificate.status, url } : null;
+    }
     default:
       return null;
   }

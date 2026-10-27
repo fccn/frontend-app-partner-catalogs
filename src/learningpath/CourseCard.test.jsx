@@ -35,16 +35,25 @@ const course = {
   courseImageAssetPath: '/asset-v1:NAU+C1+2026+type@asset+block@image.png',
 };
 
-const renderCard = (overrides = {}) => render(
+const renderCard = (overrides = {}, { isEnrolledInLearningPath = true } = {}) => render(
   <IntlProvider locale="en">
     <ToastProvider>
-      <CourseCardWithEnrollment course={{ ...course, ...overrides }} learningPathId="catalog-1" isEnrolledInLearningPath />
+      <CourseCardWithEnrollment
+        course={{ ...course, ...overrides }}
+        learningPathId="catalog-1"
+        isEnrolledInLearningPath={isEnrolledInLearningPath}
+      />
     </ToastProvider>
   </IntlProvider>,
 );
 
-const availableCertificate = { status: 'downloadable', downloadUrl: '/certificates/abc123' };
-const generatingCertificate = { status: 'generating', downloadUrl: null };
+// What useCourseCertificate selects: the status and the already resolved URL.
+const availableCertificate = { status: 'downloadable', url: 'http://local.openedx.io/certificates/abc123' };
+const generatingCertificate = { status: 'generating', url: null };
+
+// The card actions, in the order they are shown.
+const footerActions = () => [...document.querySelectorAll('.pgn__card-footer a, .pgn__card-footer button')]
+  .map(element => element.textContent);
 
 // Makes the enroll request fail the way axios does, with the given error body.
 const failEnrollmentWith = (response) => {
@@ -84,6 +93,12 @@ describe('CourseCardWithEnrollment enrollment errors', () => {
 });
 
 describe('CourseCard certificate', () => {
+  const { location } = window;
+
+  afterEach(() => {
+    window.location = location;
+  });
+
   it.each([
     ['in progress', 0.7],
     ['not started', 0],
@@ -97,19 +112,15 @@ describe('CourseCard certificate', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  it('opens an absolute certificate URL as is', () => {
-    useCourseCertificate.mockReturnValue({ data: { status: 'downloadable', downloadUrl: 'https://cdn.example.com/cert.pdf' } });
-    renderCard({ status: 'in progress', percent: 0.7 });
-
-    expect(screen.getByRole('link', { name: 'View Certificate' })).toHaveAttribute('href', 'https://cdn.example.com/cert.pdf');
-  });
-
-  it('shows a disabled button while the certificate is being generated', () => {
+  it('shows a disabled button and the Certified state while the certificate is being generated', () => {
     useCourseCertificate.mockReturnValue({ data: generatingCertificate });
     renderCard({ status: 'in progress', percent: 0.7 });
 
     expect(screen.getByRole('button', { name: 'Generating Certificate...' })).toBeDisabled();
     expect(screen.queryByRole('link', { name: 'View Certificate' })).not.toBeInTheDocument();
+    // A certificate being generated counts as certified, like in openedx-corporate.
+    expect(screen.getByText('Certified')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
 
   it.each([
@@ -120,8 +131,18 @@ describe('CourseCard certificate', () => {
     renderCard({ status, percent });
 
     expect(screen.getByText('Certified')).toBeInTheDocument();
+    // The certificate is the main action, above the course button.
+    expect(footerActions()).toEqual(['View Certificate', courseButton]);
     fireEvent.click(screen.getByRole('button', { name: courseButton }));
     expect(mockMutate).toHaveBeenCalledWith(course.id, expect.any(Object));
+  });
+
+  it('keeps the certificate available when the learner is not enrolled in the catalog', () => {
+    useCourseCertificate.mockReturnValue({ data: availableCertificate });
+    renderCard({ status: 'in progress', percent: 0.7 }, { isEnrolledInLearningPath: false });
+
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'View Certificate' })).toHaveAttribute('href', availableCertificate.url);
   });
 
   it.each([
@@ -137,7 +158,6 @@ describe('CourseCard certificate', () => {
   });
 
   it('does not look up the certificate for administrators and sends them to the course', () => {
-    const { location } = window;
     delete window.location;
     window.location = { href: '' };
     getAuthenticatedUser.mockReturnValue({ administrator: true });
@@ -148,6 +168,5 @@ describe('CourseCard certificate', () => {
     expect(useCourseCertificate).toHaveBeenCalledWith(course.id, { enabled: false });
     expect(window.location.href).toBe('http://apps.local.openedx.io/learning/course/course-v1:NAU+C1+2026/home');
     expect(mockMutate).not.toHaveBeenCalled();
-    window.location = location;
   });
 });

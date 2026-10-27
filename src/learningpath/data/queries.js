@@ -45,6 +45,9 @@ export const STALE_TIMES = {
 
 // How often the certificates are refetched while one of them is being generated.
 export const CERTIFICATE_GENERATING_REFETCH_INTERVAL = 10 * 1000; // 10 seconds
+// Refetches after which a page stops waiting for a certificate that is still being generated
+// (about 5 minutes), so a certificate stuck in that state does not keep an open page polling.
+export const CERTIFICATE_GENERATING_MAX_REFETCHES = 30;
 
 // Learning Paths Queries
 export const useLearningPaths = () => {
@@ -407,10 +410,12 @@ export const useCourseCertificate = (courseId, { enabled = true } = {}) => useQu
   enabled: !!courseId && enabled,
   staleTime: STALE_TIMES.CERTIFICATES,
   select: (certificates) => findCourseCertificate(certificates, courseId),
-  // Keep refetching while a certificate is being generated, so its card enables without a reload.
-  refetchInterval: (query) => (
-    query.state.data?.some?.(({ status }) => status === CERTIFICATE_STATUS.GENERATING)
+  // Keep refetching while this card's certificate is being generated, so the card enables
+  // without a reload. Cards on the page share the request, and other courses do not trigger it.
+  refetchInterval: (query) => {
+    const isGenerating = findCourseCertificate(query.state.data, courseId)?.status === CERTIFICATE_STATUS.GENERATING;
+    return isGenerating && query.state.dataUpdateCount <= CERTIFICATE_GENERATING_MAX_REFETCHES
       ? CERTIFICATE_GENERATING_REFETCH_INTERVAL
-      : false
-  ),
+      : false;
+  },
 });

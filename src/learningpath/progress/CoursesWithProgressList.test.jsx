@@ -8,7 +8,7 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { getAuthenticatedHttpClient, getAuthenticatedUser } from '@edx/frontend-platform/auth';
 
 import { ToastProvider } from '../../hooks/useToast';
-import { CERTIFICATE_GENERATING_REFETCH_INTERVAL } from '../data/queries';
+import { CERTIFICATE_GENERATING_MAX_REFETCHES, CERTIFICATE_GENERATING_REFETCH_INTERVAL } from '../data/queries';
 import CoursesWithProgressList from './CoursesWithProgressList';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -133,6 +133,36 @@ describe('CoursesWithProgressList certificates', () => {
     });
     // No certificate is being generated anymore, so it stops refetching.
     expect(certificatesRequests()).toHaveLength(2);
+  });
+
+  it('does not refetch for a certificate being generated in a course that is not on the page', async () => {
+    jest.useFakeTimers();
+    mockCertificatesResponses([certificate('course-v1:NAU+OTHER+2026', 'generating')]);
+    renderList();
+
+    await waitFor(() => expect(certificatesRequests()).toHaveLength(1));
+    await act(async () => {
+      jest.advanceTimersByTime(CERTIFICATE_GENERATING_REFETCH_INTERVAL * 3);
+    });
+
+    expect(certificatesRequests()).toHaveLength(1);
+  });
+
+  it('stops refetching a certificate that stays in generation', async () => {
+    jest.useFakeTimers();
+    mockCertificatesResponses([certificate('course-v1:NAU+C1+2026', 'generating')]);
+    renderList();
+
+    await waitFor(() => expect(certificatesRequests()).toHaveLength(1));
+    for (let i = 0; i < CERTIFICATE_GENERATING_MAX_REFETCHES + 5; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await act(async () => {
+        jest.advanceTimersByTime(CERTIFICATE_GENERATING_REFETCH_INTERVAL);
+      });
+    }
+
+    expect(certificatesRequests()).toHaveLength(1 + CERTIFICATE_GENERATING_MAX_REFETCHES);
+    expect(within(card('course-v1:NAU+C1+2026')).getByRole('button', { name: 'Generating Certificate...' })).toBeDisabled();
   });
 
   it('falls back to the progress buttons when the certificates cannot be loaded', async () => {
