@@ -174,11 +174,16 @@ export async function fetchOrganizations() {
   })));
 }
 
-export async function getCourseCertificate(courseId) {
+/**
+ * Lists the learner's certificates in a single request. The LMS only returns passing
+ * certificates that are already viewable in their course, so a certificate whose
+ * available date has not been reached is not listed.
+ */
+export async function fetchCertificates() {
   const client = getAuthenticatedHttpClient();
-  const user = getAuthenticatedUser();
+  const { username } = getAuthenticatedUser();
   const response = await client.get(
-    `${getConfig().LMS_BASE_URL}/api/certificates/v0/certificates/${user.username}/courses/${courseId}/`,
+    `${getConfig().LMS_BASE_URL}/api/certificates/v0/certificates/${username}/`,
   );
   return camelCaseObject(response.data);
 }
