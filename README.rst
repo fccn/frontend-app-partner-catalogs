@@ -1,32 +1,66 @@
-frontend-app-learning-paths
-###########################
+frontend-app-partner-catalogs
+###############################
 
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
-.. |license-badge| image:: https://img.shields.io/github/license/open-craft/frontend-app-learning-paths.svg
-    :target: https://github.com/open-craft/frontend-app-learning-paths/blob/main/LICENSE
+.. |license-badge| image:: https://img.shields.io/github/license/fccn/frontend-app-partner-catalogs.svg
+    :target: https://github.com/fccn/frontend-app-partner-catalogs/blob/main/LICENSE
     :alt: License
 
 .. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
 
-.. |ci-badge| image:: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml
+.. |ci-badge| image:: https://github.com/fccn/frontend-app-partner-catalogs/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/fccn/frontend-app-partner-catalogs/actions/workflows/ci.yml
     :alt: Continuous Integration
 
-.. |codecov-badge| image:: https://codecov.io/github/open-craft/frontend-app-learning-paths/coverage.svg?branch=main
-    :target: https://codecov.io/github/open-craft/frontend-app-learning-paths?branch=main
+.. |codecov-badge| image:: https://codecov.io/github/fccn/frontend-app-partner-catalogs/coverage.svg?branch=main
+    :target: https://codecov.io/github/fccn/frontend-app-partner-catalogs?branch=main
     :alt: Codecov
+
+Repository Origin
+=================
+
+This repository is a fork of `open-craft/frontend-app-learning-paths`_ adapted by FCCN
+to support partner-specific catalog functionality.
+
+.. _open-craft/frontend-app-learning-paths: https://github.com/open-craft/frontend-app-learning-paths
 
 Purpose
 =======
 
-The Learning Paths MFE provides a specialized frontend interface for managing and displaying
-learning paths in Open edX. Learning paths are curated sequences of courses that guide learners
-through a structured educational journey toward mastering specific skills or knowledge areas.
+The Partner Catalogs MFE provides a specialized frontend interface for managing and displaying
+partner-specific learning catalogs in Open edX. Partner catalogs are curated sequences of courses
+that guide learners through a structured educational journey toward mastering specific skills or
+knowledge areas, tailored for enterprise and corporate learning needs.
 
-This MFE serves as the frontend for the learning-paths-plugin_, which provides the complete backend functionality.
+This MFE serves as the frontend for the `openedx-corporate`_ plugin for corporate and partner catalog management.
 
-.. _learning-paths-plugin: https://github.com/open-craft/learning-paths-plugin/
+.. _openedx-corporate: https://github.com/fccn/openedx-corporate
+
+Application Views
+=================
+
+This MFE provides three main views:
+
+**Dashboard** (``/``)
+   **Component**: ``Dashboard`` (``src/learningpath/Dashboard.jsx``)
+
+   Lists all available partner catalogs with filtering, search, and pagination.
+   Supports status, date range, and organization filters. Persists filter state
+   in localStorage. Integrates with enterprise dashboard for corporate learners.
+
+**Learning Path Detail** (``/:org/catalog/:key/*``)
+   **Component**: ``LearningPathDetailPage`` (``src/learningpath/LearningPathDetails.jsx``)
+
+   Displays a specific partner catalog with its courses and enrollment options.
+   Includes hero section with catalog metadata, course list with progress tracking,
+   enrollment/decline flows, and GDPR data sharing consent modal.
+
+**Course Detail** (``/course/:courseKey``)
+   **Component**: ``CourseDetailPage`` (``src/learningpath/CourseDetails.jsx``)
+
+   Shows individual course details including description, partner branding, enrollment
+   dates, certificate availability, and duration. Provides direct course enrollment action.
 
 Getting Started
 ===============
@@ -34,7 +68,7 @@ Getting Started
 Tutor Setup
 -----------
 
-Follow these steps to set up the Learning Paths MFE with Tutor:
+Follow these steps to set up the Partner Catalogs MFE with Tutor:
 
 #. Navigate to your Tutor plugins directory:
 
@@ -51,7 +85,7 @@ Follow these steps to set up the Learning Paths MFE with Tutor:
       @MFE_APPS.add()
       def _add_learning_paths_mfe(mfes):
           mfes["learning-paths"] = {
-              "repository": "https://github.com/open-craft/frontend-app-learning-paths.git",
+              "repository": "https://github.com/fccn/frontend-app-partner-catalogs.git",
               "port": 2100,
               "version": "main",  # optional, will default to the Open edX current tag
           }
@@ -75,7 +109,7 @@ Follow these steps to set up the Learning Paths MFE with Tutor:
 
       tutor dev stop mfe && tutor dev start -d
 
-#. Access the Learning Paths MFE at: http://apps.local.openedx.io:2100/learning-paths/
+#. Access the Partner Catalogs MFE at: http://apps.local.openedx.io:2100/learning-paths/
 
 Development Setup
 -----------------
@@ -86,8 +120,8 @@ After completing the Tutor setup, prepare the repository for local development:
 
    .. code-block:: bash
 
-      git clone https://github.com/open-craft/frontend-app-learning-paths.git
-      cd frontend-app-learning-paths
+       git clone https://github.com/fccn/frontend-app-partner-catalogs.git
+       cd frontend-app-partner-catalogs
 
 #. Create `.env.private` with the following content:
 
@@ -111,7 +145,7 @@ After completing the Tutor setup, prepare the repository for local development:
    .. code-block:: bash
 
       cd ..
-      tutor mounts add $(pwd)/frontend-app-learning-paths
+       tutor mounts add $(pwd)/frontend-app-partner-catalogs
 
 #. Restart the MFE container (to unbind the port) and start the MFEs:
 
@@ -155,9 +189,9 @@ You can also run this MFE locally without mounting it in Tutor:
 
    .. code-block:: bash
 
-      cd frontend-app-learning-paths
-      npm install
-      npm run start:local
+       cd frontend-app-partner-catalogs
+       npm install
+       npm run start:local
 
 Getting Help
 ============
@@ -173,7 +207,7 @@ channel`_.
 For anything non-trivial, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/open-craft/frontend-app-learning-paths/issues
+https://github.com/fccn/frontend-app-partner-catalogs/issues
 
 For more information about these options, see the `Getting Help`_ page.
 
@@ -218,7 +252,7 @@ The assigned maintainers for this component and other project details may be
 found in `Backstage`_. Backstage pulls this data from the ``catalog-info.yaml``
 file in this repo.
 
-.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-learning-paths
+.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-partner-catalogs
 
 Reporting Security Issues
 =========================
