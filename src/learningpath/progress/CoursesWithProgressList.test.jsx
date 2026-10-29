@@ -64,7 +64,7 @@ const certificatesRequests = () => mockGet.mock.calls.filter(([url]) => url === 
 
 const renderList = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+  const result = render(
     <IntlProvider locale="en">
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
@@ -73,6 +73,7 @@ const renderList = () => {
       </QueryClientProvider>
     </IntlProvider>,
   );
+  return { ...result, queryClient };
 };
 
 const card = (courseId) => screen.getByText(courseId).closest('.pgn__card');
@@ -163,6 +164,39 @@ describe('CoursesWithProgressList certificates', () => {
 
     expect(certificatesRequests()).toHaveLength(1 + CERTIFICATE_GENERATING_MAX_REFETCHES);
     expect(within(card('course-v1:NAU+C1+2026')).getByRole('button', { name: 'Generating Certificate...' })).toBeDisabled();
+  });
+
+  it('waits for a certificate that starts generating after many other refetches', async () => {
+    jest.useFakeTimers();
+    const ordinaryRefetches = CERTIFICATE_GENERATING_MAX_REFETCHES + 1;
+    // Nothing is generating on the page load and the ordinary refetches (window focus,
+    // invalidations) that follow; the certificate starts generating on the last of them.
+    mockCertificatesResponses(
+      ...Array(ordinaryRefetches).fill([]),
+      [certificate('course-v1:NAU+C1+2026', 'generating')],
+    );
+    const { queryClient } = renderList();
+
+    await waitFor(() => expect(certificatesRequests()).toHaveLength(1));
+    for (let i = 0; i < ordinaryRefetches; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await act(() => queryClient.refetchQueries({ queryKey: ['certificates'] }));
+    }
+    // React Query notifies the cards in a setTimeout, which fake timers only run on advance.
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(within(card('course-v1:NAU+C1+2026')).getByRole('button', { name: 'Generating Certificate...' })).toBeDisabled();
+    const requestsBeforePolling = certificatesRequests().length;
+
+    for (let i = 0; i < 5; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await act(async () => {
+        jest.advanceTimersByTime(CERTIFICATE_GENERATING_REFETCH_INTERVAL);
+      });
+    }
+
+    expect(certificatesRequests().length - requestsBeforePolling).toBe(5);
   });
 
   it('falls back to the progress buttons when the certificates cannot be loaded', async () => {

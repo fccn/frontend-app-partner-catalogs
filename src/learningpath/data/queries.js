@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import * as api from './api';
 import {
   addCompletionStatus,
@@ -45,9 +45,10 @@ export const STALE_TIMES = {
 
 // How often the certificates are refetched while one of them is being generated.
 export const CERTIFICATE_GENERATING_REFETCH_INTERVAL = 10 * 1000; // 10 seconds
-// Refetches after which a page stops waiting for a certificate that is still being generated
+// Refetches after which a card stops waiting for a certificate that is still being generated
 // (about 5 minutes), so a certificate stuck in that state does not keep an open page polling.
 export const CERTIFICATE_GENERATING_MAX_REFETCHES = 30;
+const CERTIFICATE_GENERATING_MAX_WAIT = CERTIFICATE_GENERATING_MAX_REFETCHES * CERTIFICATE_GENERATING_REFETCH_INTERVAL;
 
 // Learning Paths Queries
 export const useLearningPaths = () => {
@@ -404,18 +405,31 @@ export const useOrganizations = () => useQuery({
 
 // Every course card reads its certificate from the same cached list, so a page issues a
 // single certificates request whatever the number of courses.
-export const useCourseCertificate = (courseId, { enabled = true } = {}) => useQuery({
-  queryKey: QUERY_KEYS.CERTIFICATES,
-  queryFn: api.fetchCertificates,
-  enabled: !!courseId && enabled,
-  staleTime: STALE_TIMES.CERTIFICATES,
-  select: (certificates) => findCourseCertificate(certificates, courseId),
-  // Keep refetching while this card's certificate is being generated, so the card enables
-  // without a reload. Cards on the page share the request, and other courses do not trigger it.
-  refetchInterval: (query) => {
-    const isGenerating = findCourseCertificate(query.state.data, courseId)?.status === CERTIFICATE_STATUS.GENERATING;
-    return isGenerating && query.state.dataUpdateCount <= CERTIFICATE_GENERATING_MAX_REFETCHES
-      ? CERTIFICATE_GENERATING_REFETCH_INTERVAL
-      : false;
-  },
-});
+export const useCourseCertificate = (courseId, { enabled = true } = {}) => {
+  // When this card first saw its certificate being generated. The wait is measured from here,
+  // not with the query's dataUpdateCount, which every fetch of the shared list increments.
+  const generatingSince = useRef(null);
+
+  return useQuery({
+    queryKey: QUERY_KEYS.CERTIFICATES,
+    queryFn: api.fetchCertificates,
+    enabled: !!courseId && enabled,
+    staleTime: STALE_TIMES.CERTIFICATES,
+    select: (certificates) => findCourseCertificate(certificates, courseId),
+    // Keep refetching while this card's certificate is being generated, so the card enables
+    // without a reload. Cards on the page share the request, and other courses do not trigger it.
+    refetchInterval: (query) => {
+      const certificate = findCourseCertificate(query.state.data, courseId);
+      if (certificate?.status !== CERTIFICATE_STATUS.GENERATING) {
+        generatingSince.current = null;
+        return false;
+      }
+      if (generatingSince.current === null) {
+        generatingSince.current = Date.now();
+      }
+      return Date.now() - generatingSince.current < CERTIFICATE_GENERATING_MAX_WAIT
+        ? CERTIFICATE_GENERATING_REFETCH_INTERVAL
+        : false;
+    },
+  });
+};
