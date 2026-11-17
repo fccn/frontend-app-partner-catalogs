@@ -204,11 +204,19 @@ export const useCourseCompletions = () => useQuery({
   staleTime: STALE_TIMES.COMPLETIONS,
 });
 
-export const useCoursesByIds = (courseIds) => {
+/**
+ * Load the courses of a catalog page, one request per course.
+ *
+ * A course that cannot be loaded does not fail the list: `data` is `{ courses, failures }`, where each
+ * failure is `{ courseKey, status }` and `status` is null when the request got no response. Failures are
+ * reported once per load to the catalog's `course-load-failures` endpoint, which writes them to the LMS
+ * log. The query itself does not fail on them, so it is not retried.
+ */
+export const useCoursesByIds = (courseIds, learningPathId) => {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['coursesByIds', ...(courseIds || [])],
+    queryKey: ['coursesByIds', learningPathId, ...(courseIds || [])],
     queryFn: async () => {
       let completionsData = queryClient.getQueryData(QUERY_KEYS.COURSE_COMPLETIONS);
       if (!completionsData) {
@@ -220,7 +228,7 @@ export const useCoursesByIds = (courseIds) => {
 
       const completionsMap = createCompletionsMap(completionsData);
 
-      const results = await Promise.all(
+      const results = await Promise.allSettled(
         courseIds.map(async (courseId) => {
           const cachedCourseDetail = queryClient.getQueryData(QUERY_KEYS.COURSE_DETAILS(courseId));
           if (cachedCourseDetail) {
@@ -245,7 +253,22 @@ export const useCoursesByIds = (courseIds) => {
           };
         }),
       );
-      return results;
+
+      const courses = [];
+      const failures = [];
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          courses.push(result.value);
+        } else {
+          failures.push({ courseKey: courseIds[index], status: result.reason?.response?.status ?? null });
+        }
+      });
+
+      if (failures.length > 0 && learningPathId) {
+        api.reportCourseLoadFailures(learningPathId, failures).catch(() => {});
+      }
+
+      return { courses, failures };
     },
     enabled: courseIds && courseIds.length > 0,
   });
