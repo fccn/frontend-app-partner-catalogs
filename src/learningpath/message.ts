@@ -27,6 +27,21 @@ const messages = defineMessages({
   enrolled: { id: 'learningpath.detail.enrolled', defaultMessage: 'Enrolled' },
   acceptInvitationText: { id: 'learningpath.detail.accept_invitation', defaultMessage: 'Accept the invitation' },
   noSubCourses: { id: 'learningpath.detail.no_sub_courses', defaultMessage: 'No sub-courses found in this learning path.' },
+  coursesFailedToLoad: {
+    id: 'learningpath.detail.courses_failed_to_load',
+    defaultMessage: 'The courses of this catalog could not be loaded.',
+    description: 'Shown to everyone in the courses section of a catalog page when none of its courses could be loaded',
+  },
+  coursesNotShown: {
+    id: 'learningpath.detail.courses_not_shown',
+    defaultMessage: '{count, plural, one {# course of this catalog cannot be shown:} other {# courses of this catalog cannot be shown:}}',
+    description: 'Shown only to catalog managers and administrators, above the list of the course keys that could not be loaded',
+  },
+  coursesNotShownAudience: {
+    id: 'learningpath.detail.courses_not_shown_audience',
+    defaultMessage: 'Learners do not see these courses or this message.',
+    description: 'Tells catalog managers and administrators that learners are not shown the courses that could not be loaded, nor the message about them',
+  },
   accessEnds: { id: 'learningpath.detail.access_ends', defaultMessage: 'Access ends' },
   certificate: { id: 'learningpath.detail.certificate', defaultMessage: 'Certificate' },
   coursesIncludeCertification: { id: 'learningpath.detail.courses_include_certification', defaultMessage: 'Courses include certification' },

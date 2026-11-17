@@ -7,6 +7,7 @@ import {
   Stack,
   AlertModal,
   ActionRow,
+  Alert,
 } from '@openedx/paragon';
 import {
   Person,
@@ -17,6 +18,7 @@ import {
   Check,
   AccessTimeFilled,
 } from '@openedx/paragon/icons';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { useIntl, FormattedDate } from '@edx/frontend-platform/i18n';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
@@ -138,13 +140,19 @@ const LearningPathDetailPage = () => {
   const courseIds = useMemo(() => (detail && detail.steps ? detail.steps.map(step => step.courseKey) : []), [detail]);
 
   const {
-    data: coursesForPath,
+    data: coursesData,
     isLoading: loadingCourses,
     error: coursesError,
-  } = useCoursesByIds(courseIds);
+  } = useCoursesByIds(courseIds, key);
+  const coursesForPath = coursesData?.courses;
+  const failedCourseKeys = useMemo(
+    () => (coursesData?.failures || []).map((failure) => failure.courseKey),
+    [coursesData],
+  );
 
   const accessUntilDate = useMemo(() => {
-    if (!coursesForPath) {
+    // It comes from the courses' end dates, so it can't be trusted while a course is missing.
+    if (!coursesForPath || failedCourseKeys.length > 0) {
       return null;
     }
 
@@ -158,7 +166,7 @@ const LearningPathDetailPage = () => {
       }
     }
     return maxDate;
-  }, [coursesForPath]);
+  }, [coursesForPath, failedCourseKeys]);
 
   const handleEnrollClick = async () => {
     setIsModalOpen(true);
@@ -236,6 +244,39 @@ const LearningPathDetailPage = () => {
       availableEndDate,
       userLimit,
     } = detail;
+
+    const canSeeCourseLoadFailures = Boolean(detail.isManager || getAuthenticatedUser()?.administrator);
+
+    let coursesList;
+    if (coursesError || (failedCourseKeys.length > 0 && !coursesForPath?.length)) {
+      coursesList = <p className="text-danger">{formatMessage(messages.coursesFailedToLoad)}</p>;
+    } else if (!coursesForPath?.length) {
+      coursesList = <p>{formatMessage(messages.noSubCourses)}</p>;
+    } else {
+      coursesList = (
+        <CoursesWithProgressList
+          courses={coursesForPath}
+          learningPathSteps={detail?.steps}
+          learningPathId={key}
+          isEnrolledInLearningPath={isEnrolledInLearningPath}
+        />
+      );
+    }
+
+    const coursesSection = (
+      <section id="courses">
+        {canSeeCourseLoadFailures && failedCourseKeys.length > 0 && (
+          <Alert variant="warning">
+            <p className="mb-2">{formatMessage(messages.coursesNotShown, { count: failedCourseKeys.length })}</p>
+            <ul className="mb-2">
+              {failedCourseKeys.map((courseKey) => <li key={courseKey}>{courseKey}</li>)}
+            </ul>
+            <p className="mb-0">{formatMessage(messages.coursesNotShownAudience)}</p>
+          </Alert>
+        )}
+        {coursesList}
+      </section>
+    );
 
     const detailSection = (
       <div className="hero px-4 px-md-6 py-4 bg-light-200">
@@ -378,37 +419,13 @@ const LearningPathDetailPage = () => {
                 onToggle={() => handleCollapsibleToggle('courses')}
                 className="mb-2"
               >
-                <section id="courses">
-                  {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>{formatMessage(messages.noSubCourses)}</p>
-                  )}
-                  {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
-                    <CoursesWithProgressList
-                      courses={coursesForPath}
-                      learningPathSteps={detail?.steps}
-                      learningPathId={key}
-                      isEnrolledInLearningPath={isEnrolledInLearningPath}
-                    />
-                  )}
-                </section>
+                {coursesSection}
               </Collapsible>
             </div>
           ) : (
             <div className="desktop-content">
               <div id="courses-section-wrapper">
-                <section id="courses">
-                  {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
-                    <p>{formatMessage(messages.noSubCourses)}</p>
-                  )}
-                  {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
-                    <CoursesWithProgressList
-                      courses={coursesForPath}
-                      learningPathSteps={detail?.steps}
-                      learningPathId={key}
-                      isEnrolledInLearningPath={isEnrolledInLearningPath}
-                    />
-                  )}
-                </section>
+                {coursesSection}
               </div>
             </div>
           )}

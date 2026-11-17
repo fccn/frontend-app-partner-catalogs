@@ -76,6 +76,14 @@ export async function fetchCourseDetails(courseId) {
   });
 }
 
+export async function reportCourseLoadFailures(learningPathId, failures) {
+  const client = getAuthenticatedHttpClient();
+  return client.post(
+    `${getConfig().LMS_BASE_URL}/partner_catalog/api/v1/catalogs/${learningPathId}/course-load-failures/`,
+    { failures: failures.map(({ courseKey, status }) => ({ course_key: courseKey, status })) },
+  );
+}
+
 export async function fetchCourseCompletion(courseId) {
   try {
     const { username } = getAuthenticatedUser();
